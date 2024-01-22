@@ -1,0 +1,57 @@
+api_id: "12345"
+  
+https:
+  port: "8092"
+  private:
+    port: "8092"
+  
+until:
+  successful:
+    maxretries: "3"
+    timebetween: "3000"
+    
+salesforce:
+  namespace: "POSIntegration"
+  domain: "domain"
+  oauth: 
+    basepath: "/services/oauth2"
+    token: "/token"
+  service_path: "/services"
+  apex:
+    member_enroll: "/apexrest/{namespace}/pos/v1/members/enroll"
+    member_details_by_id: "/apexrest/{namespace}/pos/v1/members/{memberId}"
+    member_details_by_query_params: "/apexrest/{namespace}/pos/v1/members"
+    get_vouchers: "/apexrest/{namespace}/pos/v1/members/{membershipNumber}/vouchers"
+    orders: "/apexrest/{namespace}/pos/v1/order"
+  errorTable: "/data/v58.0/sobjects/{namespace}__LoyaltyOrderPlacementError__c"
+  connected_app:
+    client_id: "client_id"
+    client_secret: "client_secret"
+    grant_type: "client_credentials"
+  
+  
+tls:
+  keySecret: "integration@keystore"
+  keyStoreSecret: "integration@keystore" 
+  
+response:
+  timeout: "120000"
+  
+cache:
+  max_entries: "1"
+  ttl: "20"
+  expiry_interval: "5"
+  
+
+scheduler:
+  frequency: "60000"
+  start_delay: "10000"
+  
+anypoint:
+  mq:
+    url: "mq_url"
+    client_id: "mq_app_client_id"
+    client_secret: "mq_app_client_secret"
+    orders:
+      destination: "orders-queue"
+      messages_limit: "10"

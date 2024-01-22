@@ -1,0 +1,64 @@
+#%RAML 1.0
+title: POS Integration Kit
+version: v1
+description: Integrate your product with point-of-sale systems, and help businesses streamline their processes. Use this API to enroll members to loyalty programs, search members, apply vouchers, and checkout items from cart.
+
+mediaType:
+  - application/json
+protocols:
+  - https
+traits:
+  member-query-params: !include /traits/member-query-params.raml
+
+uses: 
+  resources:  /resource-types/resource-types.raml
+
+types:
+  member-enrollment-request: !include data-types/member-enrolment.raml
+  orders: !include data-types/orders.raml
+
+
+/members:
+  type: {
+          resources.membersCollection:
+            {
+              getMembersResponseExampleReference: !include examples/response/member-profiles.raml, 
+              getMembersResponseTypeReference:  !include data-types/response/member-profile.raml,
+            postMembersRequestTypeReference: member-enrollment-request,    postMembersRequestExampleReference: !include examples/request/member-enrolment.raml,
+            postMembersResponseTypeReference: !include data-types/response/member-enrollment-response.raml,
+            postMembersResponseExampleReference: !include examples/response/member-enrolment.raml,
+            membersPostDisplayName: Enroll member to loyalty program,
+            membersGetDisplayName: Retrieve member profile details
+            
+            }
+        }
+  post:
+    description: Enrolls a member to the Loyalty program.
+  get:
+    is: [member-query-params]
+    description: Retrieves member details based on the membershipNumber, membershipId, or posMemId properties.
+  
+  /{membershipNumber}/vouchers:
+      uriParameters:
+        membershipNumber:
+          description: Unique identifier of the member whose vouchers are being retrieved. 
+      type: {
+              resources.vouchersCollection: {
+                getVouchersResponseExampleReference: !include examples/response/vouchers.raml,
+                getVouchersResponseExampleType: !include data-types/response/vouchers.raml,
+                vouchersGetDisplayName: Retrieve voucher details
+              }
+        }
+      get:
+        description: Retrieves voucher details based on the voucherStatus, productId, productName, productCategoryId, and productCategoryName properties. If there’s no search query parameter, this API retrieves all the vouchers.
+        
+/orders:
+  type: {
+          resources.ordersCollection: {
+              postOrdersRequestTypeReference: orders,
+              postOrdersRequestExampleReference: !include examples/request/orders.raml,
+              postOrdersResponseExampleReference: !include examples/response/orders.raml,
+              postOrdersResponseExampleType: !include data-types/response/orders.raml,
+              ordersPostDisplayName: Create orders
+          }
+    }

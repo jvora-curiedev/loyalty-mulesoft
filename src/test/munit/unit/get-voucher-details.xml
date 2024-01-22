@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="get-voucher-details.xml" />
+	<munit:test name="get-voucher-details" doc:id="a5d644ce-c442-4b50-85ca-cc64904b657f">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Retrieve Member Profile Details" doc:id="8999fb02-42e9-4811-8917-db2e2d80f989" processor="http:request" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Retrieve Vouchers" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/json --- readUrl('classpath://response/voucher-details.json', 'application/json')]" mediaType="application/json" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="get:\members\(membershipNumber)\vouchers:loyalty-management-api-config" doc:id="5f17ac22-e5e7-4c04-9258-031cd919db68" name="get:\members\(membershipNumber)\vouchers:loyalty-management-api-config" />
+		</munit:execution>
+		<munit:validation >
+			<logger level="INFO" doc:name="Logger" doc:id="0ecb4191-2c2d-4ea3-966f-57b9b66013be" message="#[payload]" />
+			<munit-tools:assert-that doc:name="Assert that" doc:id="08c3f063-61b1-443e-a580-65c9de071685" expression="#[payload]" is="#[MunitTools::equalTo(readUrl('classpath://response/voucher-details.json'))]" />
+		</munit:validation>
+	</munit:test>
+	<munit:test name="get-vouchers-flow-test-func-error" doc:id="c494b43d-c5b2-47d3-a156-db79e9a2e84b" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Retrieve Vouchers" doc:id="109a9a29-5a76-4b5a-a245-d4f1b73c509f" processor="http:request" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Retrieve Vouchers" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="HTTP:BAD_REQUEST" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="get:\members\(membershipNumber)\vouchers:loyalty-management-api-config" doc:id="df222092-342b-4f06-b277-fff6334f61ef" name="get:\members\(membershipNumber)\vouchers:loyalty-management-api-config" />
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="138612dd-59b4-4854-bc53-54003bc10b4c" is="#[MunitTools::nullValue()]" expression="#[payload]" />
+		</munit:validation>
+	</munit:test>
+	<munit:test name="get-vouchers-flow-test-connectivity-error" doc:id="e64d5411-cd7a-4dde-bc9c-13123ef5c9b9" expectedErrorType="HTTP:CONNECTIVITY">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Member Enrollment API" doc:id="91967511-38ec-4e75-8ef5-091f004cfd0d" processor="http:request" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Retrieve Vouchers" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="HTTP:CONNECTIVITY" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="get:\members\(membershipNumber)\vouchers:loyalty-management-api-config" doc:id="8df4a20d-e074-45c5-a65a-dfb42a9694f4" name="get:\members\(membershipNumber)\vouchers:loyalty-management-api-config" />
+		</munit:execution>
+	</munit:test>
+
+</mule>

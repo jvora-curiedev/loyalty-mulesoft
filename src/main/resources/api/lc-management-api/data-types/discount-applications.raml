@@ -1,0 +1,30 @@
+#%RAML 1.0 DataType
+type: object
+properties:
+  allocation_method:
+    type: string
+    description: The method by which the discount application value is allocated to entitled lines. Valid values are across, each, and one.
+  code:
+    type: string
+    description: The discount code used to apply the discount. Available only for discount code applications.
+  description:
+    type: string
+    description: The description of the discount application. Available only for manual and script discount applications.
+  target_selection:
+    type: string
+    description: The order line, of the type defined by target_type, that the discount is allocated over. Valid values are all, entitled, and explicit.
+  target_type:
+    type: string
+    description: The type of order line that the discount is applicable to. Valid values are line_item and shipping_line.
+  title:
+    type: string
+    description: The title of the discount application, as defined by the merchant. Available only for manual discount applications.
+  type:
+    type: string
+    description: The discount application type. Valid values are automatic, discount_code, manual, and script.
+  value:
+    type: string
+    description: The decimal value by which the price of an order or a product is reduced, when a discount is applied. For example, to apply a 20% discount, the value is 20.0.
+  value_type:
+    type: string
+    description: The type of the value. Valid values are fixed_amount and percentage.

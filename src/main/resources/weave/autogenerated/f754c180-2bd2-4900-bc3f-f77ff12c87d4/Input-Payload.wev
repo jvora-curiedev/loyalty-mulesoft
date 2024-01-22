@@ -1,0 +1,40 @@
+%dw 2.0
+
+type auto_f754c180_2bd2_4900_bc3f_f77ff12c87d4_Input_Payload = {
+  enrollmentChannel?: String, 
+  enrollmentDate: String, 
+  referredByMemberReferralCode?: String, 
+  memberStatus?: String, 
+  relatedCorporateMembershipNumber?: String, 
+  membershipNumber: String, 
+  transactionJournalStatementFrequency?: String, 
+  canReceivePromotions?: "true" | "false", 
+  transactionJournalStatementMethod?: String, 
+  createTransactionJournals?: String, 
+  additionalMemberFieldValues?: {
+    attributes?: {
+      CustomBoolean__c?: "true" | "false", 
+      _?: Any
+    }, 
+    _?: Any
+  }, 
+  referredBy?: String, 
+  associatedContactDetails: {
+    firstName: String, 
+    lastName: String, 
+    allowDuplicateRecords?: "true" | "false", 
+    additionalContactFieldValues?: {
+      attributes?: {
+        CustomNumber__c?: String, 
+        PersonMailingCity?: String, 
+        _?: Any
+      }, 
+      _?: Any
+    }, 
+    email: String, 
+    _?: Any
+  }, 
+  membershipEndDate: String, 
+  _?: Any
+}
+

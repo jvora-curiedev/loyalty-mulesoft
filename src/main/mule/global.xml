@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:os="http://www.mulesoft.org/schema/mule/os" 
+    xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway"
+	xmlns:tls="http://www.mulesoft.org/schema/mule/tls" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd 
+http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd
+http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
+	<http:request-config name="OAuth_Request_Config" doc:name="HTTP Request configuration" doc:id="19d2591f-1ff5-446a-94ca-b5cbdc70337d" basePath="${salesforce.oauth.basepath}">
+		<http:request-connection protocol="HTTPS" host="${salesforce.domain}" />
+	</http:request-config>
+	<http:request-config name="member_enrollment_http_request_config" doc:name="HTTP Request configuration" doc:id="bf19a355-a39f-4dcb-b29a-8b8dbb8466c9" basePath="${salesforce.service_path}" >
+		<http:request-connection protocol="HTTPS" host='${salesforce.domain}' />
+	</http:request-config>
+	<ee:object-store-caching-strategy name="Caching_Strategy" doc:name="Caching Strategy" doc:id="8ec617df-b28e-4081-9458-003a92f7b5ae" keyGenerationExpression="#[p('salesforce.connected_app.client_id')]">
+		<os:private-object-store alias="token_cache" maxEntries="${cache.max_entries}" entryTtl="${cache.ttl}" entryTtlUnit="MINUTES" expirationInterval="${cache.expiry_interval}" />
+	</ee:object-store-caching-strategy>
+	<http:listener-config name="loyalty-management-api-httpListenerConfig">
+        <http:listener-connection host="0.0.0.0" port="${https.port}" protocol="HTTPS">
+			<tls:context>
+                <tls:key-store type="jks" keyPassword="${tls.keySecret}" password="${tls.keyStoreSecret}" path="keystore.jks" alias="mule" />
+            </tls:context>
+		</http:listener-connection>
+    </http:listener-config>
+    <apikit:config name="loyalty-management-api-config" api="lc-management-api/lc-management-api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+	<configuration-properties doc:name="Configuration properties" doc:id="d2cb56a8-3873-4e32-a840-56763c7dd645" file="constants.yaml" />
+	<configuration-properties doc:name="Configuration properties" doc:id="c0351bb7-f01a-47a5-8704-f3b16657e10d" file="config/config.yaml" />
+	<api-gateway:autodiscovery apiId="${api_id}" ignoreBasePath="true" doc:name="API Autodiscovery" doc:id="acbc91af-2b3b-477d-ba74-70e7c49f7635" flowRef="loyalty-management-api-main" />
+	<configuration doc:name="Configuration" doc:id="f8f25c9f-5676-4f7d-9b2f-591e2eef1a7d" defaultErrorHandler-ref="global_error_handler" />
+	<error-handler name="global_error_handler" doc:id="730584fe-7b9c-427a-bbe2-b6a1b0dc30eb" >
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="6fe2fb89-64c1-47da-8603-72cbb2526ba8" type="CONNECTIVITY">
+			<set-variable value="504" doc:name="Set Variable" doc:id="b38c86f8-7770-437d-a021-c9c60ddcd343" variableName="httpStatus"/>
+			<flow-ref doc:name="Flow Reference" doc:id="b7729743-9670-46d8-bd09-1f91ed61a7b9" name="Generate_Error_Response"/>
+		</on-error-propagate>
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="e4bebc0d-5d4c-4413-87bd-ad38ff1f704e" type="ANY">
+			<choice doc:name="Choice" doc:id="1a5049b6-2170-43b2-9df9-3ed6f962eeb5" >
+				<when expression="#[error.errorType.namespace =='APIKIT']">
+					<choice doc:name="Choice" doc:id="f0c9d643-f379-43ee-ada5-142b92c1f0c4" >
+						<when expression="#[error.errorType.identifier == 'BAD_REQUEST']">
+							<set-variable value="${error.badRequest.code}" doc:name="HTTP Response Status" doc:id="f4539765-fb90-4cb0-8f91-1663dd44b28d" variableName="httpStatus"/>
+							<set-variable value="${error.badRequest.description}" doc:name="HTTP Error Description" doc:id="eacbf8ed-810e-4538-8143-ffaa4f620d94" variableName="description"/>
+						</when>
+						<when expression="#[error.errorType.identifier == 'NOT_FOUND']">
+							<set-variable value="${error.notFound.code}" doc:name="HTTP Response Status" doc:id="611708ab-1d52-4e0e-830a-c34e7540a48e" variableName="httpStatus"/>
+							<set-variable value="${error.notFound.description}" doc:name="HTTP Error Description" doc:id="dd880ff4-e4f5-468a-8d57-031380739440" variableName="description"/>
+						</when>
+						<when expression="#[error.errorType.identifier == 'METHOD_NOT_ALLOWED']">
+							<set-variable value="${error.methodNotAllowed.code}" doc:name="HTTP Response Status" doc:id="305cbb1d-cb00-4b55-b7a7-49cdb0b69879" variableName="httpStatus"/>
+							<set-variable value="${error.methodNotAllowed.description}" doc:name="HTTP Error Description" doc:id="a57840dc-e5be-4e4f-977e-d593e67230c4" variableName="description"/>
+						</when>
+						<when expression="#[error.errorType.identifier == 'UNSUPPORTED_MEDIA_TYPE']">
+							<set-variable value="${error.notSupported.code}" doc:name="HTTP Response Status" doc:id="86277557-57b3-472d-8ff2-8cc9d15796ec" variableName="httpStatus"/>
+							<set-variable value="${error.notSupported.description}" doc:name="HTTP Error Description" doc:id="20eb573c-6210-4f38-b540-7df601851ebc" variableName="description"/>
+						</when>		
+					</choice>
+				</when>
+				<otherwise >
+					<set-variable value="500" doc:name="HTTP Response Status" doc:id="4137ad1b-c56a-48b3-877b-590641623f40" variableName="httpStatus"/>
+				</otherwise>
+			</choice>
+			<logger level="INFO" doc:name="Logger" doc:id="768ac65c-8866-433c-962b-5e8f14a69ef8" message="#[vars.httpStatus]"/>
+			<flow-ref doc:name="Flow Reference" doc:id="e1a2e940-c9aa-478c-a5fe-6a15195d1bd4" name="Generate_Error_Response"/>
+		</on-error-propagate>
+		
+	</error-handler>
+	<sub-flow name="Generate_Error_Response" doc:id="438620c0-2afe-4ce5-bd9b-7e3fa0c01e65" >
+		<ee:transform doc:name="Error Message" doc:id="ec83e3d8-d09e-48db-82d2-39742572d1a7" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"errorCode": vars.httpStatus,
+	"message" : vars.description default error.description
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="ERROR" doc:name="Logger" doc:id="38696450-bd04-47f1-9dc2-9bebefe556e5" message='#[payload]'/>
+	</sub-flow>
+</mule>

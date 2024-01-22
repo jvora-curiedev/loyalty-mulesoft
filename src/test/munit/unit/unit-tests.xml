@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="unit-tests.xml" />
+	<munit:test name="member-enrollment-flow-test" doc:id="45024a1b-f8b6-48b2-bab1-c77b8ec60cb9">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Retrieve Token" doc:id="d22b1b94-37ae-4a0c-b4e1-1ce613e5c057" processor="flow-ref" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="retrieve-token" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/json --- readUrl('classpath://response/auth-token.json')]" />
+					<munit-tools:variables >
+						<munit-tools:variable key="response" value="#[readUrl('classpath://response/auth-token.json')]" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Member Enrollment API" doc:id="89dc6209-e712-437f-9092-3e13512ba594" processor="http:request">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Member Enrollment API" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/json --- readUrl('classpath://response/member-enrollment.json','application/json')]" mediaType="application/json" />
+				</munit-tools:then-return>
+			
+</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<set-variable value="#[readUrl('classpath://requests/member-enrollment.json')]" doc:name="requestPayload" doc:id="2a4b7a99-dfa5-4a20-a42b-f4d703051043" variableName="requestPayload"/>
+			<flow-ref doc:name="post:\members:application\json:loyalty-management-api-config" doc:id="64b39abe-36cc-42f8-8209-1cd56c691434" name="post:\members:application\json:loyalty-management-api-config"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="bcb46322-80b5-4462-9bf0-4dc57fa035e4" expression="#[payload]" is="#[MunitTools::equalTo(readUrl('classpath://response/member-enrollment.json'))]" />
+		</munit:validation>
+	</munit:test>
+	<munit:test name="member-enrollment-flow-test-func-error" doc:id="9667ffcb-6f7a-4c36-b2e7-98842e6065e2">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Retrieve Token" doc:id="36876236-c14b-4042-ae15-186a63ad5569" processor="flow-ref" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="retrieve-token" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/json --- readUrl('classpath://response/auth-token.json')]" />
+					<munit-tools:variables >
+						<munit-tools:variable key="response" value="#[readUrl('classpath://response/auth-token.json')]" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Member Enrollment API" doc:id="4a192c3b-f984-4115-b402-ba6a8faa34ae" processor="http:request">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Member Enrollment API" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[readUrl('classpath://response/member-enrollment.json')]" />
+					<munit-tools:error typeId="HTTP:BAD_REQUEST" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<set-variable value="#[readUrl('classpath://requests/member-enrollment.json')]" doc:name="requestPayload" doc:id="37acd455-fa46-4d7b-b907-503d5b3d851e" variableName="requestPayload"/>
+			<flow-ref doc:name="post:\members:application\json:loyalty-management-api-config" doc:id="f9c45dd8-50c0-4b70-8b46-93ab3d6c3ca9" name="post:\members:application\json:loyalty-management-api-config"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="1a491fad-27f0-4030-8a04-ecb52ee9eeaa" is="#[MunitTools::nullValue()]" expression="#[payload]"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="member-enrollment-flow-test-connectivity-error" doc:id="8d83955c-375d-411f-a899-8c0eeeee6751" expectedErrorType="HTTP:CONNECTIVITY">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Retrieve Token" doc:id="61751895-bfb5-4b0c-a5cc-fdf60f9b6528" processor="flow-ref" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="retrieve-token" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/json --- readUrl('classpath://response/auth-token.json')]" />
+					<munit-tools:variables >
+						<munit-tools:variable key="response" value="#[readUrl('classpath://response/auth-token.json')]" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Member Enrollment API" doc:id="c1dcec0c-14f8-4df5-9454-2e03386b100a" processor="http:request">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Member Enrollment API" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[readUrl('classpath://response/member-enrollment.json')]" />
+					<munit-tools:error typeId="HTTP:CONNECTIVITY" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<set-variable value="#[readUrl('classpath://requests/member-enrollment.json')]" doc:name="requestPayload" doc:id="83694a37-7a8e-4e6d-850f-e70369a44b01" variableName="requestPayload"/>
+			<flow-ref doc:name="post:\members:application\json:loyalty-management-api-config" doc:id="631cc2dd-c70e-47ba-b953-bef924efca7a" name="post:\members:application\json:loyalty-management-api-config"/>
+		</munit:execution>
+	</munit:test>
+	<munit:test name="get-member-by-id-flow-test" doc:id="ae877588-a71a-496b-a9c2-6ed75d5168a7">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Retrieve Token" doc:id="4fee7a6c-6784-4cb5-96d2-da841333a294" processor="flow-ref" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="retrieve-token" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/json --- readUrl('classpath://response/auth-token.json')]" />
+					<munit-tools:variables >
+						<munit-tools:variable key="response" value="#[readUrl('classpath://response/auth-token.json')]" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Retrieve Member Profile Details" doc:id="992f1a10-d9b4-4b22-be8f-547fb8180599" processor="http:request" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Retrieve Member Profile Details" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/json --- readUrl('classpath://response/member-profiles.json', 'application/json')]" mediaType="application/json" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<set-variable value="#[readUrl('classpath://requests/member-enrollment.json')]" doc:name="requestPayload" doc:id="c57a72cd-648f-47a5-85db-5fa2de904b58" variableName="requestPayload" />
+			<flow-ref doc:name="post:\members:application\json:loyalty-management-api-config" doc:id="7da78427-03bd-41ee-8899-0e308547647d" name="get:\members\(memberId):loyalty-management-api-config" />
+		</munit:execution>
+		<munit:validation >
+			<logger level="INFO" doc:name="Logger" doc:id="d97a47b1-7554-4312-9bb2-6c5bb11d8066" message="#[payload]"/>
+			<munit-tools:assert-that doc:name="Assert that" doc:id="1cc8f98e-d1ed-4677-a507-e9d5555c10c7" expression="#[payload]" is="#[MunitTools::equalTo(readUrl('classpath://response/member-profiles.json'))]" />
+		</munit:validation>
+	</munit:test>
+	<munit:test name="get-member-by-id-flow-test-func-error" doc:id="aadb4478-b0a4-4140-b9a5-600541a6938a">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Retrieve Token" doc:id="b8377e5f-a1ce-4590-8ed7-3f15ddb78057" processor="flow-ref" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="retrieve-token" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/json --- readUrl('classpath://response/auth-token.json')]" />
+					<munit-tools:variables >
+						<munit-tools:variable key="response" value="#[readUrl('classpath://response/auth-token.json')]" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Retrieve Member Profile Details" doc:id="c6add128-0c6c-4436-94b9-42e651d40885" processor="http:request" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Retrieve Member Profile Details" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="HTTP:BAD_REQUEST" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="get:\members\(memberId):loyalty-management-api-config" doc:id="5574113f-f0cc-48f3-b3c2-910b5658b200" name="get:\members\(memberId):loyalty-management-api-config" />
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="e6b0608c-5951-46a2-b174-863eba3366cd" is="#[MunitTools::nullValue()]" expression="#[payload]" />
+		</munit:validation>
+	</munit:test>
+	<munit:test name="get-member-by-id-flow-test-connectivity-error" doc:id="ff43c2de-488e-43dc-8c4e-df843ed2eeec" expectedErrorType="HTTP:CONNECTIVITY">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Retrieve Token" doc:id="ddfb673b-2b4e-4ab9-92b6-41f430e0f530" processor="flow-ref" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="retrieve-token" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/json --- readUrl('classpath://response/auth-token.json')]" />
+					<munit-tools:variables >
+						<munit-tools:variable key="response" value="#[readUrl('classpath://response/auth-token.json')]" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Member Enrollment API" doc:id="84062cad-c2f2-4e1a-b0f0-83c6c6dac67b" processor="http:request" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Retrieve Member Profile Details" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="HTTP:CONNECTIVITY" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="get:\members\(memberId):loyalty-management-api-config" doc:id="b4a5e676-d28f-42c2-8e72-2082d5508266" name="get:\members\(memberId):loyalty-management-api-config" />
+		</munit:execution>
+	</munit:test>
+
+
+</mule>

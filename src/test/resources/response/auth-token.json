@@ -1,0 +1,9 @@
+ {
+    "access_token": "00DDn00000C16Vj!AQkAQCtjycNRLBS4kJE51z2xyEBxVcPpKacsIZ68c2pMuSqoDKrD7rHYF.gtCwqpa31jASZ8qmJ_56hE1pf8W2yGvUGfBy5C",
+    "signature": "tBymBP3/rFbi5fVo0bpYAbNIcAV6ImemdA/7ywQjXwU=",
+    "scope": "lightning visualforce cdp_query_api cdp_ingest_api custom_permissions openid cdp_segment_api cdp_profile_api content cdp_identityresolution_api chatbot_api wave_api cdp_calculated_insight_api chatter_api api id eclair_api pardot_api forgot_password",
+    "instance_url": "https://kanikabhat-230130-973-demo-dev-ed.develop.my.salesforce.com",
+    "id": "https://login.salesforce.com/id/00DDn00000C16VjMAJ/005Dn000008B8nUIAS",
+    "token_type": "Bearer",
+    "issued_at": "1685449581398"
+}

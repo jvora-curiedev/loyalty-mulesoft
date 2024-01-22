@@ -1,0 +1,71 @@
+#%RAML 1.0 Library
+
+traits:
+  authorization: !include ../traits/authorization.raml
+  common-errors: !include ../traits/common-errors.raml
+  voucher-query-params: !include ../traits/voucher-query-params.raml
+
+resourceTypes:
+  membersCollection:
+    post?:
+      is: [authorization, common-errors]
+      displayName: <<membersPostDisplayName>>
+      description: This is used to create <<resourcePathName>>
+      body:
+        application/json:
+          type: <<postMembersRequestTypeReference>>
+          example: |
+            <<postMembersRequestExampleReference>>
+      responses:
+        201:
+          body:
+            application/json:
+              type: <<postMembersResponseTypeReference>>
+              example: |
+                <<postMembersResponseExampleReference>>
+
+    get?:
+      is: [authorization,common-errors]
+      displayName: <<membersGetDisplayName>>
+      description: Resource used to retreive member details
+      responses:
+        200:
+          body:
+            application/json:
+              type: <<getMembersResponseTypeReference>>
+              example: | 
+                <<getMembersResponseExampleReference>>
+
+  vouchersCollection:
+    get:
+      is: [authorization,common-errors,voucher-query-params]
+      displayName: <<vouchersGetDisplayName>>
+      responses:
+        200:
+          body:
+            application/json:
+              type: <<getVouchersResponseExampleType>>
+              example: | 
+                <<getVouchersResponseExampleReference>>
+
+  ordersCollection:
+    post:
+      is: [authorization, common-errors]
+      description: Creates accrual and redemption orders
+      displayName: <<ordersPostDisplayName>>
+      body:
+        application/json:
+          type: <<postOrdersRequestTypeReference>>
+          example: |
+            <<postOrdersRequestExampleReference>>
+      responses:
+        201:
+          body:
+            application/json:
+              type: <<postOrdersResponseExampleType>>
+              example: |
+                <<postOrdersResponseExampleReference>>
+
+
+
+    

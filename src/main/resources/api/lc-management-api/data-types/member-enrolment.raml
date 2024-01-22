@@ -1,0 +1,92 @@
+#%RAML 1.0 DataType
+
+type:
+  properties: 
+    enrollmentDate:
+      type: datetime-only
+      description: The date on which the member is enrolled.
+    membershipNumber:
+      type: string
+      description: The unique membership number of the member.
+    associatedContactDetails:
+      type: object
+      description: The person account record details of the member.
+      properties:
+        firstName:
+          type: string
+          description: The first name of the member being enrolled.
+        lastName:
+          type: string
+          description: The last name of the member being enrolled.
+        email:
+          type: string
+          description: The email address of the member being enrolled.
+        allowDuplicateRecords?:
+          type: string
+          description: Indicates whether a duplicate member record can be created, when a record with identical details exists in the org.
+          enum: ["true","false"]
+        additionalContactFieldValues?:
+          type: object
+          description: The additional attributes that must be saved in the person account.
+          properties:
+            attributes?: 
+              type: object
+              properties:
+                PersonMailingCity?:
+                  type: string
+                CustomNumber__c?:
+                  type: string
+    memberStatus?:
+      type: string
+      description: The status of the member. Possible values are Active, Inactive, and Custom
+    referredBy?:
+      type: string
+      description: The membership number of the member who referred the member.
+    referredByMemberReferralCode?:
+      type: string
+      description: The referral code of the member who referred the member.
+    createTransactionJournals?:
+      type: string
+      description: Indicates whether to create transaction journal records (true) or not (false). Transaction journal records are created to Credit points to the member for enrolling and Credit points to the member who referred the new member.
+    transactionJournalStatementFrequency?:
+      type: string
+      description: The frequency at which transaction journal statements must be delivered to the member. Possible values are Monthly and Quarterly.
+    transactionJournalStatementMethod?:
+      type: string
+      description: The method that delivers transaction journal statements to the member. Possible values are Mail and Email.
+    enrollmentChannel?:
+      type: string
+      description: The channel used by members to enroll in the program. Possible values are POS, Web, Email, CallCenter, Social, Mobile, Store, Franchise, Partner, and Print.
+    canReceivePromotions?:
+      type: string
+      enum: ["true","false"]
+      description: Indicates whether the member can receive promotions for the program (true) or not (false).
+    membershipEndDate?:
+      type: datetime-only
+      description: The date on which the membership ends.
+    relatedCorporateMembershipNumber?:
+      type: string
+      description: The external corporate membership number of the member.
+    additionalMemberFieldValues?:
+      type: object
+      description: The custom attributes of the member in the member record. Keys and Values
+      properties:
+        attributes?:
+          type: object
+          properties:
+            CustomBoolean__c?:
+              type: string
+              enum: ["true", "false"]
+              description: The value for custom boolean, could be true or false.
+            posName__c?:
+              type: string
+              description: The name of the member from the Point Of Sale (POS) system. 
+            posMemMobile__c?:
+              type: number
+              description: The phone number of the member from the POS system.
+            posMemId__c?:
+              type: number
+              description: The POS Member ID.
+            posOrderCount__c?:
+              type: string
+              description: The total count of orders processed through a POS system. 

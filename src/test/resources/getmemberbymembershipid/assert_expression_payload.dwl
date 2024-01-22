@@ -1,0 +1,105 @@
+%dw 2.0
+import * from dw::test::Asserts
+---
+payload must equalTo({
+  "additionalLoyaltyProgramMemberFields": {
+    "posMemId__c": "675424",
+    "City__c": null,
+    "Age__c": null,
+    "Anniversary__c": null,
+    "posName__c": "TestPOSName",
+    "DateOfBirth__c": null,
+    "posOrderCount__c": 10.0,
+    "Gender__c": null,
+    "SeedData__c": false,
+    "posMemMobile__c": "1234567890"
+  },
+  "associatedAccount": null,
+  "associatedContact": {
+    "contactId": "003Dn00000OWs1yIAD",
+    "email": "abc@email.com",
+    "firstName": "Daisy",
+    "lastName": "Deeds"
+  },
+  "canReceivePartnerPromotions": true,
+  "canReceivePromotions": true,
+  "enrollmentChannel": "Email",
+  "enrollmentDate": "2023-06-01",
+  "groupCreatedByMember": null,
+  "groupName": null,
+  "lastActivityDate": null,
+  "loyaltyProgramMemberId": "0lMDn000001qkTHMAY",
+  "loyaltyProgramName": "NTO Insider",
+  "memberCurrencies": [
+    {
+      "additionalLoyaltyMemberCurrencyFields": {},
+      "escrowPointsBalance": 0.0,
+      "expirablePoints": 0.0,
+      "lastAccrualProcessedDate": "2023-06-05T14:21:42.000Z",
+      "lastEscrowProcessedDate": null,
+      "lastExpirationProcessRunDate": null,
+      "lastPointsAggregationDate": null,
+      "lastPointsResetDate": null,
+      "loyaltyMemberCurrencyName": "NQP Currency test",
+      "loyaltyProgramCurrencyId": "0lcDn0000000JUBIA2",
+      "loyaltyProgramCurrencyName": null,
+      "memberCurrencyId": "0lzDn000003H3VOIA0",
+      "nextQualifyingPointsResetDate": null,
+      "pointsBalance": 50.0,
+      "qualifyingPointsBalanceBeforeReset": 0.0,
+      "totalEscrowPointsAccrued": 0.0,
+      "totalEscrowRolloverPoints": 0.0,
+      "totalPointsAccrued": 50.0,
+      "totalPointsExpired": 0.0,
+      "totalPointsRedeemed": 0.0
+    },
+    {
+      "additionalLoyaltyMemberCurrencyFields": {},
+      "escrowPointsBalance": 0.0,
+      "expirablePoints": 0.0,
+      "lastAccrualProcessedDate": null,
+      "lastEscrowProcessedDate": null,
+      "lastExpirationProcessRunDate": null,
+      "lastPointsAggregationDate": null,
+      "lastPointsResetDate": null,
+      "loyaltyMemberCurrencyName": "QP Currency",
+      "loyaltyProgramCurrencyId": "0lcDn0000000JUCIA2",
+      "loyaltyProgramCurrencyName": null,
+      "memberCurrencyId": "0lzDn000003H3VPIA0",
+      "nextQualifyingPointsResetDate": "2024-03-15",
+      "pointsBalance": 0.0,
+      "qualifyingPointsBalanceBeforeReset": 0.0,
+      "totalEscrowPointsAccrued": 0.0,
+      "totalEscrowRolloverPoints": 0.0,
+      "totalPointsAccrued": 0.0,
+      "totalPointsExpired": 0.0,
+      "totalPointsRedeemed": 0.0
+    }
+  ],
+  "memberStatus": "Active",
+  "memberTiers": [
+    {
+      "additionalLoyaltyMemberTierFields": {},
+      "areTierBenefitsAssigned": false,
+      "loyaltyMemberTierId": "0lyDn000001yfVBIAY",
+      "loyaltyMemberTierName": "Gold",
+      "tierChangeReason": null,
+      "tierChangeReasonType": null,
+      "tierEffectiveDate": "2023-06-01",
+      "tierExpirationDate": null,
+      "tierGroupId": "0ltDn0000000JiWIAU",
+      "tierGroupName": null,
+      "tierId": "0lgDn0000000JY8IAM",
+      "tierSequenceNumber": 1
+    }
+  ],
+  "memberType": "Individual",
+  "membershipEndDate": "2024-01-01",
+  "membershipLastRenewalDate": null,
+  "membershipNumber": "Member111459889",
+  "referredBy": null,
+  "relatedCorporateMembershipNumber": null,
+  "transactionJournalStatementFrequency": "Monthly",
+  "transactionJournalStatementLastGeneratedDate": null,
+  "transactionJournalStatementMethod": "Mail"
+})

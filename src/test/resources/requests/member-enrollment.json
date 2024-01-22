@@ -1,0 +1,27 @@
+{
+  "enrollmentDate" : "2022-01-01T00:00:00",
+  "membershipNumber" : "Member11145",
+  "associatedContactDetails" : {
+    "firstName" : "Daisy",
+    "lastName" : "Deeds",
+    "email" : "abc@email.com",
+    "allowDuplicateRecords" : "false",
+    "additionalContactFieldValues" : {
+      "attributes" : {
+        "PersonMailingCity" : "Delhi"
+             }
+    }
+  },
+  "memberStatus" : "Active",
+  "createTransactionJournals" : "true",
+  "transactionJournalStatementFrequency" : "Monthly",
+  "transactionJournalStatementMethod" : "Mail",
+  "enrollmentChannel" : "Email",
+  "canReceivePromotions": "true",
+  "canReceivePartnerPromotions" : "true",
+  "membershipEndDate" : "2024-01-01T00:00:00",
+  "additionalMemberFieldValues" : {
+    "attributes" : {
+        }
+  }
+}

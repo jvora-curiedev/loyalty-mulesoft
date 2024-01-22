@@ -1,0 +1,10 @@
+{
+	"main":"lc-management-api.raml",
+	"name":"Loyalty Management POS API Powered by Mulesoft",
+	"classifier":"raml",
+	"tags":["Loyalty Management"],
+	"assetId":"${ASSETGROUPID}",
+	"version":"1.0.1",
+	"apiVersion":"v1",
+	"originalFormatVersion":"1.0"
+}

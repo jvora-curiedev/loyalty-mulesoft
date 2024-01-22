@@ -1,0 +1,23 @@
+#%RAML 1.0 DataType
+type: object
+properties:
+  shop_money:
+    type: object
+    description: A money value, in the shop’s currency.
+    properties:
+      amount:
+        type: string
+        description: The amount used to show the prices.
+      currency_code:
+        type: string
+        description: Three-letter ISO 4217 currency code of the monetary currency that the prices are shown in.
+  presentment_money:
+    type: object
+    description: A money value, in the local (presentment) currency.
+    properties:
+      amount:
+        type: string
+        description: The presentment amount that shows the prices.
+      currency_code:
+        type: string
+        description: The presentment currency that the prices are shown in.

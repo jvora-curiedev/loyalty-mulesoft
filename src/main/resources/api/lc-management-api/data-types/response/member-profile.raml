@@ -1,0 +1,216 @@
+#%RAML 1.0 DataType
+type:
+  properties:
+    additionalLoyaltyProgramMemberFields:
+      type: object
+      properties:
+        posMemId__c: 
+          type: string
+          description: Membership ID as specified by POS.
+        City__c: 
+          type: string | nil
+          description: Member's city of residence.
+        Age__c:
+          type: number | nil
+          description: The age of the member
+        Anniversary__c:
+          type: date-only | nil
+          description: The date of anniversary.
+        posName__c:
+          type: string
+          description: The name of the POS.
+        DateOfBirth__c:
+          type: date-only | nil
+          description: Date of Birth of the member enrolled.
+        posOrderCount__c:
+          type: number
+          description: Number of orders placed at POS.
+        Gender__c:
+          type: string | nil
+          description: Members gender.
+        SeedData__c:
+          type: boolean | nil
+          description: Boolean valud indicating if its a seed data.
+        posMemMobile__c:
+          type: string
+          description: Mobile number of the member.
+    associatedAccount:
+      type: string | nil
+      description: The associated accounts.
+    associatedContact:
+      type: object
+      properties:
+        contactId:
+          type: string
+          description: The ID of the contact in Salesforce.
+        email:
+          type: string
+          description: Email ID of the contact associated.
+        firstName:
+          type: string
+          description: First Name of the contact.
+        lastName:
+          type: string
+          description: Last Name of the contact.
+    canReceivePartnerPromotions:
+      type: boolean | nil
+      description: Boolean value indicating if member opts for partner promotional communication.
+    canReceivePromotions:
+      type: boolean | nil
+      description: Boolean value indicating whether the member wants to receive promotionla communication.
+    enrollmentChannel:
+      type: string
+      description: The channel that was used to enroll the member.
+    enrollmentDate:
+      type: date-only
+      description: The date member was enrolled.
+    groupCreatedByMember: 
+      type: string | nil
+      description: The group created by the member.
+    groupName:
+      type: string | nil
+      description: The name of the group.
+    lastActivityDate:
+      type: date-only | nil
+      description: The date when last activity was performed.
+    loyaltyProgramMemberId:
+      type: string
+      description: The Id of member in Salesforce.
+    loyaltyProgramName:
+      type: string
+      description: The name of the loyalty program.
+    memberCurrencies:
+      type: array
+      description: The details of member currency.
+      items:
+        properties:
+          additionalLoyaltyMemberCurrencyFields:
+            type: object
+            description: additionalLoyaltyMemberCurrencyFields
+          escrowPointsBalance:
+            type: number
+            description: The escrow points balance.
+          expirablePoints:
+            type: number
+            description: The expirable points.
+          lastAccrualProcessedDate:
+            type: string | nil
+            description: The lastAccrualProcessed date.
+          lastEscrowProcessedDate:
+            type: datetime | nil
+            description: The last escrow processed date.
+          lastExpirationProcessRunDate:
+            type: datetime | nil
+            description: The last expiration process run date.
+          lastPointsAggregationDate:
+            type: datetime | nil
+            description: The last point aggregation date
+          lastPointsResetDate:
+            type: date-only | nil
+            description: The date when points were last reset.
+          loyaltyMemberCurrencyName:
+            type: string
+            description: The name of currency applicatble for the loyalty member
+          loyaltyProgramCurrencyId:
+            type: string
+            description: The Id in Salesforce associated with the currency.
+          loyaltyProgramCurrencyName:
+            type: string | nil
+            description: The curreny name applicable to the loyalty program.
+          memberCurrencyId:
+            type: string
+            description: The member currency Id.
+          nextQualifyingPointsResetDate:
+            type: string | nil
+            description: The next qualifying points reset date.
+          pointsBalance:
+            type: number
+            description: The points balance.
+          qualifyingPointsBalanceBeforeReset:
+            type: number
+            description: The qualifying points balance before reset.
+          totalEscrowPointsAccrued:
+            type: number
+            description: The total escrow points accrued.
+          totalEscrowRolloverPoints:
+            type: number
+            description: The total escrow points that can be rolled over.
+          totalPointsAccrued:
+            type: number
+            description: The total number of points accrued.
+          totalPointsExpired:
+            type: number
+            description: The number of points expired.
+          totalPointsRedeemed:
+            type: number
+            description: The number of points redeemed.
+    memberStatus:
+      type: string
+      description: Status of the member.
+    memberTiers:
+      type: array
+      items:
+        properties:
+          additionalLoyaltyMemberTierFields:
+            type: object
+            description: The additional fields applicable for LoyaltyMember
+          areTierBenefitsAssigned:
+            type: boolean
+            description: Indicates if tier benefits are assigned.
+          loyaltyMemberTierId:
+            type: string
+            description: The tier ID of the loyalty member in Salesforce.
+          loyaltyMemberTierName:
+            type: string
+            description: The tier name assigned to the loyalty member's membership.
+          tierChangeReason:
+            type: string | nil
+            description: The reason for tier change.
+          tierChangeReasonType:
+            type: string | nil
+            description: The reason type for tier change.
+          tierEffectiveDate: 
+            type: date-only
+            description: The date from which change in tier is effective.
+          tierExpirationDate:
+            type: date-only | nil
+            description: The expiration date of the tier.
+          tierGroupId:
+            type: string
+            description: The Salesforce ID associated with the tier group.
+          tierGroupName:
+            type: string | nil
+            description: The name of the tier group.
+          tierId:
+            type: string
+            description: The Salesforce Id associated with the tier.
+          tierSequenceNumber:
+            type: number
+            description: The sequence number of the tier.
+    memberType:
+      type: string
+      description: The member type
+    membershipEndDate:
+      type: date-only
+      description: The date when membership ends.
+    membershipLastRenewalDate:
+      type: date-only | nil
+      description: The last date when membership was renewed.
+    membershipNumber:
+      type: string
+      description: The membership number.
+    referredBy:
+      type: string | nil
+      description: The individual who referred.
+    relatedCorporateMembershipNumber:
+      type: string | nil
+      description: The related corporate membership number.
+    transactionJournalStatementFrequency:
+      type: string | nil
+      description: The frequency at which the statment should be sent to the member.
+    transactionJournalStatementLastGeneratedDate:
+      type: string | nil
+      description: The last generated date of the statement.
+    transactionJournalStatementMethod:
+      type: string | nil
+      description: The transaction journal statement method.

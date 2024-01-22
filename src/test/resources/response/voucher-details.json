@@ -1,0 +1,46 @@
+{
+    "voucherCount": 3,
+    "vouchers": [
+        {
+            "effectiveDate": "2023-06-12",
+            "expirationDate": "2023-09-12",
+            "faceValue": 200.0,
+            "isVoucherDefinitionActive": true,
+            "isVoucherPartiallyRedeemable": false,
+            "status": "Issued",
+            "type": "FixedValue",
+            "voucherCode": "TestFixed",
+            "voucherDefinition": "Fixed OneTimeUse Vouchers",
+            "voucherId": "0kDDn0000022pHOMAY",
+            "voucherNumber": "00000026"
+        },
+        {
+            "discountPercent": 20,
+            "effectiveDate": "2023-06-12",
+            "expirationDate": "2023-09-12",
+            "isVoucherDefinitionActive": true,
+            "isVoucherPartiallyRedeemable": false,
+            "productId": "01tDn000004z9R7IAI",
+            "productName": "Checked Silk Tie",
+            "status": "Issued",
+            "type": "DiscountPercentage",
+            "voucherCode": "TestDiscount",
+            "voucherDefinition": "DiscountProductVouchers",
+            "voucherId": "0kDDn0000022pHPMAY",
+            "voucherNumber": "00000028"
+        },
+        {
+            "effectiveDate": "2023-06-12",
+            "expirationDate": "2023-09-12",
+            "faceValue": 200.0,
+            "isVoucherDefinitionActive": true,
+            "isVoucherPartiallyRedeemable": false,
+            "status": "Issued",
+            "type": "FixedValue",
+            "voucherCode": "TestPartial",
+            "voucherDefinition": "Partial Redeemable Voucher Definiton",
+            "voucherId": "0kDDn0000022pHTMAY",
+            "voucherNumber": "00000027"
+        }
+    ]
+}

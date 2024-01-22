@@ -1,0 +1,36 @@
+#%RAML 1.0 NamedExample
+{
+  "enrollmentDate" : "2021-01-01T00:00:00",
+  "membershipNumber" : "Member1",
+  "associatedContactDetails" : {
+    "firstName" : "Name1",
+    "lastName" : "Name2",
+    "email" : "ab@email.com",
+    "allowDuplicateRecords" : "false",
+    "additionalContactFieldValues" : {
+      "attributes" : {
+        "PersonMailingCity" : "Delhi",
+        "CustomNumber__c" : "20.0"      }
+    }
+  },
+
+  "memberStatus" : "Active",
+  "referredBy" : "Member2",
+  "referredByMemberReferralCode" : "MPX12adf",
+  "createTransactionJournals" : "true",
+  "transactionJournalStatementFrequency" : "Monthly",
+  "transactionJournalStatementMethod" : "Mail",
+  "enrollmentChannel" : "Email",
+  "canReceivePromotions": "true",
+  "canReceivePartnerPromotions" : "true",
+  "membershipEndDate" : "2022-01-01T00:00:00",
+  "relatedCorporateMembershipNumber" : "Member3",
+  "additionalMemberFieldValues" : {
+    "attributes" : {
+      "CustomBoolean__c" : "true",
+      "posName__c":"Shopify",
+      "posMemMobile__c": 123456,
+      "posMemId__c": 1234567,
+      "posOrderCount__c": "10"    }
+  }
+}

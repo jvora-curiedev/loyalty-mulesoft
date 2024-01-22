@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:custom-metrics="http://www.mulesoft.org/schema/mule/custom-metrics" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:tracing="http://www.mulesoft.org/schema/mule/tracing" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd  http://www.mulesoft.org/schema/mule/tracing http://www.mulesoft.org/schema/mule/tracing/current/mule-tracing.xsd http://www.mulesoft.org/schema/mule/custom-metrics http://www.mulesoft.org/schema/mule/custom-metrics/current/mule-custom-metrics.xsd">
+    <flow name="loyalty-management-api-main">
+        <http:listener config-ref="loyalty-management-api-httpListenerConfig" path="/api/v1/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:error-response>
+        </http:listener>
+        <set-variable value="#[authentication]" doc:name="returnFromPolicy" doc:id="4466417e-8f84-4bcf-b1d6-ebf6b8a63355" variableName="returnFromPolicy" />
+        <tracing:with-correlation-id doc:name="With CorrelationID" doc:id="84f55710-d77a-4186-a5e8-06a266d2b9e9" correlationId="#[(vars.returnFromPolicy.properties.userProperties.correlationId) default correlationId]">
+            <apikit:router config-ref="loyalty-management-api-config" />
+        </tracing:with-correlation-id>
+    </flow>
+    <flow name="get:\members:loyalty-management-api-config">
+        <ee:transform doc:name="Request Attributes" doc:id="6b259fa5-42f7-41fa-86c7-9e85a02414a1">
+            <ee:message />
+            <ee:variables>
+                <ee:set-variable variableName="requestAttributes"><![CDATA[%dw 2.0
+output application/java
+---the file types are either a language with a known grammar or yaml, json or xml.
+attributes]]></ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <logger level="INFO" doc:name="INFO: Request Received" doc:id="e2d00527-6b90-493a-8cf3-f99210224ab1" message="Received a request in get:\members:loyalty-management-api-config" />
+        <flow-ref doc:name="get-member-by-queryparams-flow" doc:id="210110da-4300-4d99-9a81-aeb099b3dda8" name="get-member-by-queryparams-flow" />
+        <logger level="INFO" doc:name="INFO: Request Completed" doc:id="4d31c128-0ec0-4287-b7b8-f0a93cc94654" message="Request completed successfully in get:\members:loyalty-management-api-config" />
+    </flow>
+    <flow name="post:\members:application\json:loyalty-management-api-config" doc:id="f754c180-2bd2-4900-bc3f-f77ff12c87d4">
+        <ee:transform doc:name="Request Attributes" doc:id="08a0ac43-9496-4bc1-bb08-34e177064ebe">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+            </ee:message>
+            <ee:variables>
+                <ee:set-variable variableName="requestAttributes"><![CDATA[%dw 2.0
+output application/java
+---
+attributes]]></ee:set-variable>
+                <ee:set-variable variableName="requestPayload"><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <logger level="INFO" message="Received a request in post:\members:application\json:loyalty-management-api-config flow" doc:name="INFO: Request Received" />
+        <flow-ref doc:name="member-enrollment-flow" doc:id="7110ff91-27bd-41da-85b5-522e50a52264" name="member-enrollment-flow" />
+        <logger level="INFO" doc:name="INFO: Request Completed" doc:id="55489ecf-122a-4cb3-9741-4f30bf4b1816" message="Request completed successfully in post:\members:application\json:loyalty-management-api-config flow" />
+    </flow>
+    <flow name="get:\members\(memberId):loyalty-management-api-config" doc:id="be9881a2-1ca9-4f3a-840f-e3210c1b1fa3">
+        <ee:transform doc:name="Request Attributes" doc:id="03b4113c-44c2-483f-a5ae-d2ca2053db8f">
+            <ee:message />
+            <ee:variables>
+                <ee:set-variable variableName="requestAttributes"><![CDATA[%dw 2.0
+output application/java
+---
+attributes]]></ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <logger level="INFO" doc:name="INFO: Request Received" doc:id="ba431613-4b5c-4ca9-8217-5d10ce06182b" message="Received a request in get:\members\(memberId):loyalty-management-api-config flow" />
+        <flow-ref doc:name="get-member-by-id-flow" doc:id="c08afbe4-0120-4ff3-8ec6-f026d4d322c4" name="get-member-by-id-flow" />
+        <logger level="INFO" message="Request completed successfully in get:\members\(memberId):loyalty-management-api-config flow" doc:name="INFO: Request Completed" />
+    </flow>
+    <flow name="post:\orders:application\json:loyalty-management-api-config" doc:id="0d6e34f8-8e2f-4b9b-9c99-b0d066258f5a">
+        <logger level="INFO" doc:name="INFO: Request Received" doc:id="2865220b-6fe8-4c40-a546-91455c847d4a" message="Received a request in post:\orders:application\json:loyalty-management-api-config" />
+        <flow-ref doc:name="order-publish-flow" doc:id="b2f0b0e3-1c94-4ac2-bcec-98d5115d1705" name="order-publish-flow" />
+        <ee:transform doc:name="Transform Message" doc:id="4cfe2a66-a1fc-4f86-a369-b09171b0a50c">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  "correlationId" : correlationId,
+  "message" : "Order acknowledged successfully"
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+        <logger level="INFO" doc:name="INFO: Request Completed" doc:id="354c2631-d138-4f17-ae37-7c9d914709a1" message="Request completed successfully in post:\orders:application\json:loyalty-management-api-config" />
+    </flow>
+    <flow name="get:\members\(membershipNumber)\vouchers:loyalty-management-api-config" doc:id="ed2aae0b-0adc-43ed-ac51-b0e6db0f252e">
+        <ee:transform doc:name="Request Attributes">
+            <ee:variables>
+                <ee:set-variable variableName="membershipNumber"><![CDATA[attributes.uriParams.'membershipNumber']]></ee:set-variable>
+                <ee:set-variable variableName="requestAttributes"><![CDATA[%dw 2.0
+output application/java
+---
+attributes]]></ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+		<logger level="INFO" doc:name="INFO: Request Received" doc:id="fb9fc5e1-04f4-4b7e-85bc-6e6bf1305d33" message="Received a request in get:\members\(memberId)\vouchers:loyalty-management-api-config" />
+		<flow-ref doc:name="get-vouchers-flow" doc:id="737310ad-70d2-4fb2-aa05-fe60825b8c77" name="get-vouchers-flow" />
+		<logger level="INFO" doc:name="INFO: Request Completed" doc:id="bc0bf97e-c997-431a-a608-d0e2cd7749e2" message="Request completed successfully in get:\members\(memberId)\vouchers:loyalty-management-api-config" />
+    </flow>
+</mule>

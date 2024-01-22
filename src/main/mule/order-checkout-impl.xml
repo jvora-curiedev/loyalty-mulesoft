@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:anypoint-mq="http://www.mulesoft.org/schema/mule/anypoint-mq"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/anypoint-mq http://www.mulesoft.org/schema/mule/anypoint-mq/current/mule-anypoint-mq.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<anypoint-mq:config name="Anypoint_MQ_Config" doc:name="Anypoint MQ Config" doc:id="10ed99b2-12e5-42e0-8b3a-2ea78db70f89" >
+		<anypoint-mq:connection url="${anypoint.mq.url}" clientId="${anypoint.mq.client_id}" clientSecret="${anypoint.mq.client_secret}" />
+	</anypoint-mq:config>
+	<flow name="order-publish-flow" doc:id="4654147d-b52d-454a-8190-84365289a0ec" >
+		<logger level="DEBUG" doc:name="DEBUG: Publishing orders to queue" doc:id="68dd66e9-3048-4ff1-8f03-c5a599bbc3e1" message="Publishing orders to queue"/>
+		<anypoint-mq:publish doc:name="Orders" doc:id="1b1b3241-04e2-4854-b3aa-1f6b37fbe454" config-ref="Anypoint_MQ_Config" destination="${anypoint.mq.orders.destination}"/>
+		<logger level="DEBUG" doc:name="DEBUG: Order published successfully" doc:id="92acd9c0-06f9-499e-8a22-deca79b4741b" message="Order published successfully"/>
+	</flow>
+	<sub-flow name="retrieve-token-subflow" doc:id="074549f0-cc49-4142-b3b9-98eafd12689f" >
+		<ee:cache doc:name="Cache" doc:id="30a2f912-3c63-4087-bc58-c7f8295eb63f" cachingStrategy-ref="Caching_Strategy" >
+			<ee:transform doc:name="Multipart Request" doc:id="38130d14-969c-4d57-8edd-4ff66c4fa679">
+			<ee:message>
+				<ee:set-payload resource="dwl/token-form-data.dwl" />
+			</ee:message>
+		</ee:transform>
+			<logger level="DEBUG" doc:name="DEBUG: Outbound Request" doc:id="ba96ca54-1d1b-4b9d-9d40-fe7f2ee89798" message="Sending request to retrieve token"/>
+			<http:request method="POST" doc:name="Retrieve Token" doc:id="fa8c5008-5507-4a5e-907f-f618876347a1" config-ref="OAuth_Request_Config" path="${salesforce.oauth.token}"/>
+			<logger level="DEBUG" doc:name="DEBUG: Outbound Response" doc:id="e39697fc-df3a-49db-9f6f-33e64d0b68c3" message="Token retrieved successfully"/>
+		</ee:cache>
+	</sub-flow>
+	<flow name="process-orders-flow" doc:id="8251a1be-cc8f-4993-8c2c-d4438917c59c" >
+		<scheduler doc:name="Scheduler" doc:id="ada6498c-9d14-4753-9088-3d16b4e654e2" >
+			<scheduling-strategy >
+				<fixed-frequency frequency="${scheduler.frequency}" startDelay="${scheduler.start_delay}" />
+			</scheduling-strategy>
+		</scheduler>
+		<logger level="INFO" doc:name="INFO: Scheduler flow started" doc:id="28236812-5008-4a43-b93d-6eefd1bfe708" message="Scheduler flow started to process orders" />
+		<flow-ref doc:name="Retrieve access token" doc:id="ef5973fe-04f1-427a-971a-2bf0bbf044b8" name="retrieve-token-subflow" target="authAccessToken"/>
+		<set-variable value="#[output application/json --- []]" doc:name="Accumulate Placed Orders" doc:id="4eeb122c-5380-45ff-a811-9d9e016cebe9" variableName="placedOrders" />
+		<set-variable value="#[output application/json --- []]" doc:name="Accumulate Cancelled Orders" doc:id="31dacd49-6cf9-4b51-a0c4-277da2be4b95" variableName="cancelledOrders" />
+		<set-variable value="#[output application/json --- []]" doc:name="Placed Orders Ack Tokens" doc:id="7bac6db7-e314-4e4c-875f-01dbc01fb20f" variableName="placedOrdersAckToken" />
+		<set-variable value="#[output application/json --- []]" doc:name="Cancelled Orders Ack Tokens" doc:id="cee92100-142e-4188-a8b0-2a244d47e8e5" variableName="cancelledOrdersAckToken" />
+		<try doc:name="Try" doc:id="89915dd3-4455-4290-8c24-97f0a3df4a57" >
+			<foreach doc:name="Retrieve orders from queue" doc:id="02846dd8-fa3e-4c80-b3f5-2633704d270d" collection="#[1 to p('anypoint.mq.orders.messages_limit')]" >
+				<logger level="DEBUG" doc:name="DEBUG: Retrieving messsage from queue" doc:id="0ec6ddd0-ffe6-4ebd-9b14-6d83492f0d8c" message="Retrieving message from queue, loop count #[vars.counter]" />
+				<anypoint-mq:consume doc:name="Orders" doc:id="0760232e-6a53-4eaf-b760-724a544e803a" config-ref="Anypoint_MQ_Config" destination="${anypoint.mq.orders.destination}" acknowledgementMode="MANUAL" />
+				<logger level="DEBUG" doc:name="DEBUG: Messsage retrieved from queue" doc:id="d0617c14-b922-4c11-a49a-a16a8e53d1ca" message="Message retrieved from queue, loop count #[vars.counter]" />
+				<choice doc:name="Place or Cancel Order?" doc:id="4ef3efa8-7916-4e45-902f-0db77cc2a6c3" >
+					<when expression='#[payload.requestType == "placeOrder"]' >
+						<set-variable value="#[output application/json --- (vars.placedOrders + payload)]" doc:name="Accumulate Placed Orders" doc:id="ed0e4bd0-97ce-4d4c-9e0c-5d415e032c55" variableName="placedOrders" />
+						<set-variable value="#[output application/json --- (vars.placedOrdersAckToken + attributes.ackToken)]" doc:name="Accumulate Placed Orders Ack Tokens" doc:id="bcdef23a-a5a7-45c0-8202-eec23e4f2cc2" variableName="placedOrdersAckToken" />
+					</when>
+					<when expression='#[payload.requestType == "cancelOrder"]' >
+						<set-variable value="#[output application/json --- (vars.cancelledOrders + payload)]" doc:name="Accumulate Cancelled Orders" doc:id="c9420615-bb68-462b-8347-d358398f5a6f" variableName="cancelledOrders" />
+						<set-variable value="#[output application/json --- (vars.cancelledOrdersAckToken + attributes.ackToken)]" doc:name="Accumulate Cancelled Orders Ack Tokens" doc:id="193d7eb1-ecf0-4c0d-9a4b-3092bf2a7036" variableName="cancelledOrdersAckToken" />
+					</when>
+					<otherwise >
+						<logger level="INFO" doc:name="INFO: Default Route" doc:id="49c704f0-5de8-4d35-a4ab-f4764ea68f5d" message="Default Route"/>
+					</otherwise>
+				</choice>
+			</foreach>
+			<error-handler >
+				<on-error-continue enableNotifications="false" logException="false" doc:name="On Error Continue" doc:id="83c5f701-fc03-4a30-8911-b5a7bcc2cf46" type="ANYPOINT-MQ:TIMEOUT" >
+					<logger level="WARN" doc:name="WARN: No more messages in the queue" doc:id="14e0f81e-a824-4d14-8791-121797c24894" message="No more messages in the queue flow will continue" />
+				</on-error-continue>
+			</error-handler>
+		</try>
+		<scatter-gather doc:name="Scatter-Gather" doc:id="d7dd1b57-f9df-4247-b9b2-ab474ff25b75" >
+			<route >
+				<choice doc:name="Place order exists?" doc:id="409dd974-36fa-41d4-8697-488fda099ca4" >
+					<when expression="#[!isEmpty(vars.placedOrders)]" >
+						<set-variable value="#[vars.placedOrdersAckToken]" doc:name="Placed Orders acktokens" doc:id="8bca836d-d07f-45f6-981e-bee448c8f38d" variableName="acktokens" />
+						<set-variable value="#[vars.placedOrders]" doc:name="Placed Orders" doc:id="4b038054-c7ce-426f-837a-caab3aac3843" variableName="orders" />
+						<flow-ref doc:name="send-orders-to-salesforce-flow" doc:id="17376d95-a11a-44e5-a564-c639a988c945" name="send-orders-to-salesforce-flow" />
+					</when>
+					<otherwise >
+						<logger level="INFO" doc:name="INFO: Default Route" doc:id="f86def2b-f488-473e-ac62-01ee28e82ce8" message="Default Route"/>
+					</otherwise>
+				</choice>
+			</route>
+			<route >
+				<choice doc:name="Cancelled order exists?" doc:id="25b401ec-ba40-4e4a-be1a-0381c9c1c28f" >
+					<when expression="#[!isEmpty(vars.cancelledOrders)]" >
+						<set-variable value="#[vars.cancelledOrdersAckToken]" doc:name="Cancelled Orders acktokens" doc:id="b48ea6fd-d741-4c47-859d-ffd4a5fa3177" variableName="acktokens" />
+						<set-variable value="#[vars.cancelledOrders]" doc:name="Cancelled Orders" doc:id="189a1f64-0d76-472f-b44b-949ef10a32f9" variableName="orders" />
+						<flow-ref doc:name="send-orders-to-salesforce-flow" doc:id="a36c20ef-4441-469c-9776-f44d85bb0649" name="send-orders-to-salesforce-flow" />
+					</when>
+					<otherwise >
+						<logger level="INFO" doc:name="INFO: Default Route" doc:id="72dcb536-7601-4a68-9fd7-4a646c7a6150" message="Default Route"/>
+					</otherwise>
+				</choice>
+			</route>
+		</scatter-gather>
+		<logger level="INFO" doc:name="INFO: Scheduler flow completed" doc:id="cf51c3e4-185c-482d-a384-18ab9478f6e5" message="Scheduler flow completed." />
+	</flow>
+	<sub-flow name="send-orders-to-salesforce-flow" doc:id="d88f7f1a-db51-4f10-90fc-4753dd183e27" >
+		<try doc:name="Try" doc:id="da40af3d-7ac2-462d-9037-52f1622d5991" >
+			<until-successful maxRetries="${until.successful.maxretries}" doc:name="Retry" doc:id="cccaf297-cf39-4e20-9503-30ba7a455f7a" millisBetweenRetries="${until.successful.timebetween}">
+			<try doc:name="Try" doc:id="c3ba3808-5dff-494e-8278-15887b6bb8fa">
+				<logger level="DEBUG" doc:name="DEBUG: Outbound Request" doc:id="d6a5ca91-9cfb-4d64-8cfb-bfc07f145342" message="Sending request to orders API." />
+				<http:request method="POST" doc:name="Orders API" doc:id="911c9162-e681-4c51-8cbf-22728d24eaf5" config-ref="member_enrollment_http_request_config" path="${salesforce.apex.orders}" responseTimeout="${response.timeout}">
+					<http:body><![CDATA[#[output application/json --- {"orders": vars.orders}]]]></http:body>
+					<http:headers><![CDATA[#[output application/java
+---
+{
+	"Authorization" : "Bearer " ++ (vars.authAccessToken.access_token)
+}]]]></http:headers>
+						<http:uri-params ><![CDATA[#[{
+	"namespace" : p('salesforce.namespace') default "POSIntegration"
+}]]]></http:uri-params>
+				</http:request>
+				<logger level="DEBUG" doc:name="DEBUG: Outbound Response" doc:id="7e0987cd-27c0-4604-b2ef-2089ebd4257b" message="Orders API call completed successfully." />
+				<error-handler>
+					<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="043a2c06-1d76-43d9-a1a7-42a11b53c218" type="HTTP:CONNECTIVITY, HTTP:TIMEOUT">
+						<logger level="ERROR" doc:name="ERROR: Connectivity or Timeout" doc:id="9309d03e-352b-4365-a1a8-aa935bb441fa" message="#[&quot;Error Occurred while calling orders API, error=&quot; ++ (error.description default '')]" />
+						<set-variable value="#[true]" doc:name="Connectivity Error" doc:id="5f91bbc6-65fd-410f-bfbb-e7ae6205d6d9" variableName="connectivityError" />
+					</on-error-propagate>
+					<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="6b68e6fd-798c-4729-8d47-7085c7245765">
+						<logger level="ERROR" doc:name="ERROR: Bad Request" doc:id="3f0dedff-49df-45d1-b25a-f75d30d36c84" message="Non retryable error, #[error.description]" />
+						<ee:transform doc:name="Extract Error Message" doc:id="fe4124a3-7b3f-4a15-96e3-4d65853a6f62">
+							<ee:message>
+								<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+error.errorMessage.payload[0]]]></ee:set-payload>
+							</ee:message>
+							<ee:variables>
+								<ee:set-variable variableName="httpStatus"><![CDATA[%dw 2.0
+output application/java
+---
+error.errorMessage.attributes.statusCode]]></ee:set-variable>
+									<ee:set-variable variableName="errorPayload" ><![CDATA[%dw 2.0
+output application/json
+---
+error.errorMessage.payload]]></ee:set-variable>
+							</ee:variables>
+						</ee:transform>
+						<logger level="ERROR" doc:name="ERROR: Error Response Payload" doc:id="6589d23a-cc05-4934-8f1f-11ec48de33eb" message="Error Response Payload #[payload]" />
+						<set-variable value="#[false]" doc:name="isSuccess" doc:id="f03ee533-f478-4ef8-9b33-38cd18fe4906" variableName="isSuccess" />
+					</on-error-continue>
+				</error-handler>
+			</try>
+		</until-successful>
+			<error-handler >
+				<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="2266b48a-213c-48a7-953b-19b4d1a8b720" >
+					<logger level="ERROR" doc:name="ERROR: Bad Request" doc:id="85088a31-7de8-42a9-83bf-98feb7309ac0" message="Non retryable error, #[error.description]" />
+					<ee:transform doc:name="Extract Error Message" doc:id="50be0b66-b506-4ca1-ab45-11a6c2112065" >
+						<ee:message >
+							<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+error.errorMessage.payload[0] default ""]]></ee:set-payload>
+						</ee:message>
+						<ee:variables >
+							<ee:set-variable variableName="httpStatus" ><![CDATA[%dw 2.0
+output application/java
+---
+error.errorMessage.attributes.statusCode]]></ee:set-variable>
+							<ee:set-variable variableName="errorPayload" ><![CDATA[%dw 2.0
+output application/json
+---
+error.errorMessage.payload]]></ee:set-variable>
+						</ee:variables>
+					</ee:transform>
+					<logger level="ERROR" doc:name="ERROR: Error Response Payload" doc:id="9856db60-4788-43f4-8023-191c63ae667d" message="Error Response Payload #[payload]" />
+					<set-variable value="#[false]" doc:name="isSuccess" doc:id="e5ee8ae3-6aba-4a74-ab67-3ba1005a06e7" variableName="isSuccess" />
+				</on-error-continue>
+			</error-handler>
+		</try>
+		<choice doc:name="Choice" doc:id="f8e859d5-2aea-4495-9486-65247ba8f3bf" >
+			<when expression="#[((vars.isSuccess default true) == false and (vars.connectivityError default false) == false) or ((if(payload is String) '' else payload.status) == &quot;Failed&quot;)]">
+				<flow-ref doc:name="push-message-to-error-table-subflow" doc:id="da694fd5-e9db-4ad4-bb72-432696fa29f0" name="push-message-to-error-table-subflow"/>
+				<set-variable value="#[true]" doc:name="isPublishedToDLQ" doc:id="f445203a-d620-49f0-8c2a-cb6bb925145d" variableName="isPublishedToDLQ"/>
+			</when>
+			<otherwise >
+				<logger level="INFO" doc:name="INFO: Default Route" doc:id="1d2cffe2-9a92-436a-a122-dfc3eaa6277e" message="Do Nothing" />
+			</otherwise>
+		</choice>
+		<choice doc:name="Choice1" doc:id="ee2d3245-a684-4b3d-8e5e-5ef0e2bef8c1" >
+			<when expression="#[(((vars.isSuccess default true) or (vars.isPublishedToDLQ default false))and ((vars.connectivityError default false) == false))]" >
+				<foreach doc:name="Acknowledge messages" doc:id="707c3715-4763-4278-b022-83f03e37d460" collection="#[1 to sizeOf(vars.acktokens)]" counterVariableName="ackcounter" >
+					<logger level="DEBUG" doc:name="DEBUG: Outbound Request" doc:id="c78528b5-570f-4824-9cd7-992bde490a4d" message="Sending request to acknowledge message" />
+					<anypoint-mq:ack doc:name="Ack" doc:id="bba6d363-97be-4d5f-8795-e70428bbdf04" config-ref="Anypoint_MQ_Config" ackToken="#[vars.acktokens[(vars.ackcounter-1)]]" />
+					<logger level="DEBUG" doc:name="DEBUG: Outbound Response" doc:id="5a3906c4-3a67-4f78-a7aa-2b12a15b2595" message="Message acknowledged successfully" />
+				</foreach>
+			</when>
+			<otherwise >
+				<foreach doc:name="Return messages to queue" doc:id="2e730622-478c-4730-aee3-926a9c162340" collection="#[1 to sizeOf(vars.acktokens)]" counterVariableName="nackcounter" >
+					<logger level="DEBUG" doc:name="DEBUG: Outbound Request" doc:id="24f980f7-1e8c-4e30-b172-3d2aadcd9feb" message="Sending request to reject the acknowledgement of message" />
+					<anypoint-mq:nack doc:name="Nack" doc:id="78136c43-20f6-4b69-9fc0-7bd9f60da9ea" config-ref="Anypoint_MQ_Config" ackToken="#[vars.acktokens[(vars.nackcounter-1)]]" />
+					<logger level="DEBUG" doc:name="DEBUG: Outbound Response" doc:id="00e1c398-010b-484b-82e3-8d181d602ad0" message="Message acknowledged rejected successfully" />
+				</foreach>
+			</otherwise>
+		</choice>
+	</sub-flow>
+	<sub-flow name="push-message-to-error-table-subflow" doc:id="f9f45a49-9f2c-4da3-9caa-d97410855def" >
+		<logger level="DEBUG" doc:name="DEBUG: Outbound Request" doc:id="3fe625a4-12c9-4cc2-9579-73de09ad02cd" message="Pushing message to error table"/>
+		<http:request method="POST" doc:name="Publish Message to Error Table" doc:id="cdee7ce3-3ade-42c2-acee-d4cf7eaa9dc4" config-ref="member_enrollment_http_request_config" path="${salesforce.errorTable}">
+			<http:body ><![CDATA[#[output application/json
+---
+{
+	(p('salesforce.namespace') ++ "__Request__c"): write({"orders": vars.orders},'application/json'),
+    (p('salesforce.namespace') ++ "__Response__c"): write(vars.errorPayload,'application/json'),
+    (p('salesforce.namespace') ++ "__Source__c") : "Mulesoft",
+    (p('salesforce.namespace') ++ "__ResponseDateTime__c"): now(),
+    (p('salesforce.namespace') ++ "__Status__c"): "Failed"
+}]]]></http:body>
+			<http:headers ><![CDATA[#[output application/java
+---
+{
+	"Authorization" : "Bearer " ++ (vars.authAccessToken.access_token)
+}]]]></http:headers>
+			<http:uri-params ><![CDATA[#[{
+	"namespace" : p('salesforce.namespace') default "POSIntegration"
+}]]]></http:uri-params>
+		</http:request>
+		<logger level="DEBUG" doc:name="DEBUG: Outbound Response" doc:id="bc1575fb-1c4d-4d9f-8e27-7308fb7cf79d" message="Message published to error table"/>
+	</sub-flow>
+</mule>

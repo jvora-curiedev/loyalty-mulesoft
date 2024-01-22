@@ -1,0 +1,35 @@
+# Loyalty Management POS API Powered by MuleSoft
+
+Salesforce Loyalty Management provides a seamless experience to Loyalty program members across channels. Enable Loyalty Management experience in retail stores or e-commerce platforms by integrating Loyalty Management with your point of sale (POS) or e-commerce system. This integration enhances customer engagement, increases sales, and fosters customer loyalty. 
+
+## What to Expect from Loyalty Management POS API Powered by MuleSoft
+Retailers recognise loyalty program members through their valued engagement history, and reward members for their engagement or transactions. This experience provides more opportunities for the members to engage with the brand and partners, and nudges members towards their engagement milestones. With Loyalty Management POS API Powered by MuleSoft, leverage these APIs:
+
+ - To enroll individual members in a loyalty program, use the Member Enrolment API.
+ - To get profile details, use the Member Profile API.
+ - To get voucher details, use the Member Vouchers API.
+ - To create accrual and redemption orders, use the Order Placement API.
+
+## Architecture:
+Securely connect your POS system and e-commerce platforms with Loyalty Management POS API Powered by MuleSoft through Loyalty Management POS API Unlocked Package, and perform loyalty-specific actions.
+
+![resources/lc-management-api-impl_home_Image_1.png](resources/lc-management-api-impl_home_Image_1.png)
+
+
+
+## Enable Loyalty Management POS API Powered by MuleSoft
+With the AnyPoint Starter for Industries license, you can set up the Loyalty Management POS API Powered by MuleSoft app. To enable Loyalty Management POS API Powered by MuleSoft:
+
+ 1. On your Salesforce org with Loyalty Management instance, install Loyalty Management POS API Unlocked Package. See [Set Up Loyalty Management Integrations API][1]. 
+ 2. From Anypoint Exchange, locate and install Loyalty Management POS API Powered by MuleSoft. 
+ 3. From your Salesforce org, go to Setup, in the Quick Find box, enter and select **Industries Integration Settings**, and enable integration for the Loyalty Management POS API Powered by MuleSoft app. 
+ 4. Connect your POS system with MuleSoft. After the POS system is connected, test the connection by running the Get Token API, which returns a token string. This token string is embedded in subsequent API calls from the POS system.
+
+## Legal Disclaimer:
+In-App Notifications: By enabling the MuleSoft for Loyalty Management POS API (and related MuleSoft integration), you (and your organization which you have the authority to bind) acknowledge and agree that:  
+(i) the APIs and MuleSoft runtime management functionality enabled herewith are intended to help you facilitate the interoperability and exchange of data between your external sources and Loyalty Management;
+(ii) it is your responsibility to (A) determine which individuals within your organization can access this functionality, and (B) set the appropriate permissions consistent with your organization's use case and related compliance obligations; and 
+(iii) the MuleSoft functionality enabled herewith is (A) provided using infrastructure technology different from Loyalty Management, and (B) subject to the applicable [Trust and Compliance][2] Documentation. In addition, your ability to use this functionality, including any associated Loyalty Management APIs, may be limited depending on the jurisdiction(s) in which your organization has operations or is located.
+
+  [1]: https://developer.salesforce.com/docs/industries/loyalty/guide/setup-unlocked-package.html
+  [2]: https://www.salesforce.com/company/legal/trust-and-compliance-documentation/

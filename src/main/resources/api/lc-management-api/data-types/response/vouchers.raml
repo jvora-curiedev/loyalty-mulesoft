@@ -1,0 +1,38 @@
+#%RAML 1.0 DataType
+type: 
+  properties:
+    voucherCount:
+      type: number
+      description: Total number of vouchers available for the member.
+    vouchers:
+      type: array
+      minItems: 0
+      items:
+        properties:
+          effectiveDate:
+            type: date-only
+            description: The date from which the voucher is effective.
+          expirationDate:
+             type: date-only
+             description: The date until which the voucher is valid.
+          faceValue?:
+            type: number
+            description: The value of the voucher.
+          isVoucherDefinitionActive:
+            type: boolean
+            description: Indicates if the definition of the voucher is active.
+          status:
+            type: string
+            description: Status of the voucher
+          type:
+            type: string
+            description: The type of the voucher.
+          voucherCode:
+            type: string
+            description: The voucher code.
+          voucherId:
+            type: string
+            description: The ID associated with the voucher.
+          voucherNumber:
+            type: string
+            description: The voucher number.

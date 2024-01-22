@@ -1,0 +1,20 @@
+#%RAML 1.0 Trait
+queryParameters:
+      voucherStatus?:
+        type: string
+        description: Specifies the status of the voucher.
+      productId?:
+        type: string
+        description: The ID of the product associated with the voucher definition.
+      productName?:
+        type: string
+        description: The type of voucher issued to the member.
+      productCategoryId?:
+        type: string
+        description: The ID of product category associated with the voucher definition.
+      productCategoryName?:
+        type: string
+        description: The name of the product category associated with the voucher definition.
+      pageNumber?:
+        type: string
+        description: The page number to be returned. If you don’t specify a value, the first page is returned. Each page contains 200 vouchers, sorted by their date of creation.

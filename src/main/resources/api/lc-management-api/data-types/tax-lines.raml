@@ -1,0 +1,20 @@
+#%RAML 1.0 DataType
+type: array
+description: A list of tax line objects with details of tax applied to the order.
+items:
+  type: object
+  properties:
+    price:
+      type: string | nil
+      description: The tax charge in shop currency.
+    rate:
+      type: number | nil
+      description: The rate of tax.
+    title:
+      type: string | nil
+      description: The name of the tax.
+    price_set:
+      type: !include amount-sets.raml
+    channel_liable:
+      type: string | nil
+      description: Indicates whether the channel that submitted the tax line is liable for remitting. A null value indicates an unknown liability for the tax line.

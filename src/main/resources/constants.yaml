@@ -1,0 +1,24 @@
+error:
+  badRequest:
+    code: "400"
+    description: "Bad request"
+    issue: "not-supported"
+  notFound:
+    code: "404"
+    description: "Resource not found"
+    issue: "not-found"
+  badPath:
+    description: "Bad path"
+  generic:
+    description: "Something went wrong. Try again later."
+    code: "500"
+  methodNotAllowed:
+    code: "405"
+    description: "Method not allowed."
+  notSupported:
+    code: "415"
+    description: "Un-supported media type"
+  auth:
+    code: "401"
+    description: "Un-Authorized request"
+  

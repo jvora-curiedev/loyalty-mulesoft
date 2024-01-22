@@ -1,0 +1,4 @@
+{
+  "minMuleVersion": "4.4.0",
+  "secureProperties":["anypoint.platform.client_id","anypoint.platform.client_secret","salesforce.connected_app.client_id","salesforce.connected_app.client_secret","anypoint.mq.client_id","anypoint.mq.client_secret"]
+}

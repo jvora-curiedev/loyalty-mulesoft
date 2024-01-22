@@ -1,0 +1,80 @@
+#%RAML 1.0 DataType
+
+type: array
+items:
+  properties:
+    id?:
+      type: number
+      description: The ID of the line item.
+    admin_graphql_api_id?:
+      type: string | nil
+    productCode:
+      type: string | nil
+      description:  Indicates the code associated with the product.
+    fulfillable_quantity:
+      type: number | nil
+      description: Indicates the quantity that can be fulfilled.
+    fulfillment_service?:
+      type: string | nil
+    fulfillment_status?:
+      type: string | nil
+      description: The fulfillment status.
+    gift_card?:
+      type: boolean | nil
+      description: Whether the item is a gift card. If true, then the item is not taxed or considered for shipping charges.
+    grams?:
+      type: number | nil
+      description: The weight of item in grams
+    name?:
+      type: string | nil
+    price:
+      type: string | nil
+      description: The price of the item before discounts have been applied in the shop currency.
+    price_set?:
+      type: !include amount-sets.raml
+      description: The price of the line item in shop and presentment currencies.
+    product_exists?:
+      type: boolean | nil
+      description: Indicates whether the product is in stock.
+    product_id?:
+      type: string | nil
+      description: A unique ID associated with the product.
+    properties?:
+      type: array
+      description: An array of custom information for the item that has been added to the cart. Often used to provide product customization options.
+      items:
+        type: string
+    quantity?:
+      type: number | nil
+      description: The number of items that were purchased.
+    requires_shipping?:
+      type: boolean | nil
+      description: Whether the item requires shipping.
+    sku?:
+      type: string | nil
+      description: The item's SKU (stock keeping unit).
+    taxable?:
+      type: boolean | nil
+      description: Whether the item was taxable.
+    title?:
+      type: string | nil
+      description: The title of the product.
+    total_discount?:
+      type: string | nil
+    total_discount_set?:
+      type: !include amount-sets.raml
+    variant_id?:
+      type: string | nil
+      description: The variant ID.
+    variant_inventory_management?:
+      type: string | nil
+      description: The variant inventory management.
+    variant_title?:
+      type: string | nil
+      description: The title of the product variant.
+    vendor?:
+      type: string | nil
+      description: The name of the item's supplier.
+    tax_lines?:
+      type: !include tax-lines.raml
+      description: A list of tax line objects, each of which details a tax applied to the item.

@@ -1,0 +1,41 @@
+#%RAML 1.0 DataType
+type: object
+properties:
+  contactId:
+    type: string
+    description: The contactId generated in Salesforce.
+  loyaltyProgramMemberId:
+    type: string
+    description: Members ID generated while enrolling in the program.
+  loyaltyProgramName:
+    type: string
+    description: Name of the loyalty program.
+  membershipNumber:
+    type: string
+    description: Membership number provided by the POS.
+  transactionJournals:
+    type: array
+    minItems: 0
+    items:
+      properties:
+        activityDate:
+          type: datetime
+          description: Timestamp of the transaction.
+        journalSubType:
+          type: string
+          description: The sub type of the journal.
+        loyaltyProgram:
+          type: string
+          description: Name of the loyatly program corresponding to the transaction
+        loyaltyProgramMember:
+          type: string
+          description: The POS provided memebership ID associated with the member.
+        referredMember:
+          type: boolean | nil
+          description: Value indicating if the member is referred or not.
+        status:
+          type: string
+          description: Stratus of the transaction.
+        transactionJournalId:
+          type: string
+          description: The Id of the transaction journal.

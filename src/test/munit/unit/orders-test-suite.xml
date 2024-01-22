@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:munit="http://www.mulesoft.org/schema/mule/munit"
+	xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<munit:config name="orders-test-suite.xml" />
+	<global-property doc:name="Global Property" doc:id="a35be6d9-1689-46d2-a737-bbf6ddff175a" name="anypoint.mq.orders.messages_limit" value="1" />
+	<munit:test name="publish-order-test-success" doc:id="3c732fd5-0e05-4fc4-80e1-4a1c0aa24c4d">
+		<munit:behavior >
+			<munit:set-event doc:name="Set Event" doc:id="6db26a33-10a0-4e2c-a2b6-695829b29888" >
+				<munit:payload value="#[output application/json --- readUrl('classpath://requests/orders.json','application/json')]" encoding="UTF-8" mediaType="application/json" />
+			</munit:set-event>
+			<munit-tools:mock-when doc:name="Orders" doc:id="b550b577-a4ac-4d6f-8ccd-b1b8ece9cfd5" processor="anypoint-mq:publish">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Orders" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="post:\orders:application\json:loyalty-management-api-config" doc:id="8cba4452-5776-4b55-92c1-4b6d23916d9a" name="post:\orders:application\json:loyalty-management-api-config"/>
+		</munit:execution>
+		<munit:validation >
+			<ee:transform doc:name="Transform Message" doc:id="f52743bb-e46a-4f8c-b633-911bea6cd600" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+payload]]></ee:set-payload>
+				</ee:message>
+				<ee:variables >
+					<ee:set-variable variableName="expected" ><![CDATA[%dw 2.0
+output application/java
+---
+payload ++ {"correlationId": correlationId}]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+			<munit-tools:assert-that doc:name="Assert that" doc:id="18c6c051-ba4b-42e7-ad77-40f0bd416499" is="#[MunitTools::equalTo(vars.expected)]" expression="#[payload]"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="process-orders-no-message" doc:id="39ee12dc-85ba-4fdb-b572-be3c14a164eb">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Consume Orders" doc:id="9ca1b027-9471-4d42-ad98-32302270118a" processor="anypoint-mq:consume">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Orders" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="ANYPOINT-MQ:TIMEOUT" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="process-orders-flow" doc:id="570df0a2-25fa-4056-9513-108869df3fca" name="process-orders-flow"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:verify-call doc:name="Verify call" doc:id="250a40ef-e8c7-4446-acbc-00f2f4c14c1b" processor="logger">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="WARN: No more messages in the queue" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="process-orders-success" doc:id="6813f1fe-40c3-4724-adb0-e2305f20aad8">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Consume Orders" doc:id="a3c01cda-2ee4-4ea6-967b-5b8aef9631b4" processor="anypoint-mq:consume" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Orders" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/json --- readUrl('classpath://requests/orders.json','application/json')]" mediaType="application/json" encoding="UTF-8" />
+					<munit-tools:attributes value='#[{"ackToken": "12345"}]' />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Retrieve Token" doc:id="c130f56e-b78d-40c6-af07-fb5c8ac732de" processor="http:request">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Retrieve Token" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Orders API" doc:id="e99f1e93-fe65-47d3-9eae-0e4f7ef4d28b" processor="http:request">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Orders API" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value='#[output application/json --- {"status": "SUCCESS"}]' mediaType="application/json" encoding="UTF-8" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Acknowleged message" doc:id="6eb12635-cd38-44f6-802e-1d28b0883374" processor="anypoint-mq:ack">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Ack" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Orders to Error Table" doc:id="a476835f-54ee-470c-b1a4-7132b5f70996" processor="http:request" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Publish Message to Error Table" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value='#[output application/json --- {&#10;    "id": "a02Hn00000XDMkoIAH",&#10;    "success": true,&#10;    "errors": []&#10;}]' />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="process-orders-flow" doc:id="d6057e6a-c31e-46f5-a993-323d7e487767" name="process-orders-flow"/>
+		</munit:execution>
+		<munit:validation >
+<munit-tools:assert-that doc:name="Assert that" doc:id="a96b7a4e-03f0-432f-9dff-7f35cab68220" is="#[MunitTools::equalTo(read(&quot;{\n  \&quot;status\&quot;: \&quot;SUCCESS\&quot;\n}&quot;,'application/json'))]" expression="#[output application/json --- payload.'0'.'payload']"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="process-orders-api-connectivity-failure" doc:id="99b88a14-b5b2-423a-b2b4-94a46cf94193">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Consume Orders" doc:id="200ebdc6-fff0-40c7-8026-4d6c65a6e9b2" processor="anypoint-mq:consume" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Orders" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/json --- readUrl('classpath://requests/orders.json','application/json')]" mediaType="application/json" encoding="UTF-8" />
+					<munit-tools:attributes value='#[{"ackToken": "12345"}]' />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Retrieve Token" doc:id="cd2d44bd-94c7-4a66-b2f9-f9dd18aeef2d" processor="http:request" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Retrieve Token" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Orders API" doc:id="911d5318-22c3-4ec1-8feb-340e919066a3" processor="http:request" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Orders API" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/json --- readUrl('classpath://response/orders-failure.json')]" mediaType="application/json" encoding="UTF-8" />
+					<munit-tools:error typeId="HTTP:CONNECTIVITY" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Reject message acknowledgement" doc:id="3f06783f-9b20-411c-a5cd-2d1661606934" processor="anypoint-mq:nack" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Nack" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Orders to Error Table" doc:id="7916a6ca-c17b-43d6-8cfd-9db4e6b01420" processor="http:request" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Publish Message to Error Table" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value='#[output application/json --- {&#10;    "id": "a02Hn00000XDMkoIAH",&#10;    "success": true,&#10;    "errors": []&#10;}]' />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="process-orders-flow" doc:id="136f1e74-c3dd-4413-a34f-87063f6186d4" name="process-orders-flow" />
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:verify-call doc:name="Nack Messages" doc:id="a0f26405-8954-4949-86f9-1c0a04e0a36f" processor="anypoint-mq:nack" atLeast="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Nack" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="process-orders-api-generic-failure" doc:id="888160d9-29eb-4d36-b256-67177dce79a3">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Consume Orders" doc:id="febad538-0934-4108-a856-a3db9331c0dd" processor="anypoint-mq:consume" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Orders" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/json --- readUrl('classpath://requests/orders.json','application/json')]" mediaType="application/json" encoding="UTF-8" />
+					<munit-tools:attributes value='#[{"ackToken": "12345"}]' />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Retrieve Token" doc:id="7dc996c3-b418-477f-bca2-741ac27f21fd" processor="http:request" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Retrieve Token" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Orders API" doc:id="6ff337e0-ff1d-48d8-a5dc-e464d567979b" processor="http:request" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Orders API" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/json --- readUrl('classpath://response/orders-failure.json')]" mediaType="application/json" encoding="UTF-8" />
+					<munit-tools:error typeId="HTTP:SECURITY" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Orders to Error Table" doc:id="e57fa7af-d310-47be-8754-a5c00384324e" processor="http:request" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Publish Message to Error Table" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value='#[output application/json --- {&#10;    "id": "a02Hn00000XDMkoIAH",&#10;    "success": true,&#10;    "errors": []&#10;}]' />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Acknowledge Message" doc:id="23a0a9af-35de-4066-bc5a-bc715ac2b20a" processor="anypoint-mq:ack" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Ack" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="process-orders-flow" doc:id="10ab9121-af12-4710-acc3-3c31ca2a68e4" name="process-orders-flow" />
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:verify-call doc:name="Reject Acknowledgement" doc:id="220faa33-d719-4208-b82f-71eb20028b1b" processor="anypoint-mq:ack" atLeast="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Ack" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="process-cancel-orders-success" doc:id="c4ba7a79-11b1-4fd2-be40-c1514f53f50a">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Consume Orders" doc:id="82776e69-abc8-4fb2-8905-08f2f2d85c06" processor="anypoint-mq:consume" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Orders" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/json --- readUrl('classpath://requests/orders-cancel.json','application/json')]" mediaType="application/json" encoding="UTF-8" />
+					<munit-tools:attributes value='#[{"ackToken": "12345"}]' />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Retrieve Token" doc:id="c5280fb5-b63e-4482-951d-1d8d56262757" processor="http:request" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Retrieve Token" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Orders API" doc:id="58701d72-4515-4efd-aaa7-39544cb678d7" processor="http:request" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Orders API" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/json --- readUrl('classpath://response/orders-failure.json')]" mediaType="application/json" encoding="UTF-8" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Acknowleged message" doc:id="f83c5ca1-1e37-45c3-901a-f429c754295c" processor="anypoint-mq:ack" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Ack" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Orders to Error Table" doc:id="611ff212-c3e1-47dc-88c2-56d2aa26aada" processor="http:request" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Publish Message to Error Table" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value='#[output application/json --- {&#10;    "id": "a02Hn00000XDMkoIAH",&#10;    "success": true,&#10;    "errors": []&#10;}]' />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="process-orders-flow" doc:id="c865c393-188c-4103-b78d-af78493c9074" name="process-orders-flow" />
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:verify-call doc:name="Orders Error Table" doc:id="269058ea-d25c-4e86-8297-4de4bce83c30" processor="http:request" atLeast="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Publish Message to Error Table" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+
+</mule>
