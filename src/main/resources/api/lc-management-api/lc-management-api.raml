@@ -62,3 +62,18 @@ types:
               ordersPostDisplayName: Create orders
           }
     }
+    
+/population:
+  get:
+    description: Retrieves population
+    queryParameters:
+      drilldowns:
+        description: drill down
+      measures:
+        description: Measure
+    responses:
+      200:
+        body:
+          application/json:
+            type: !include data-types/response/population.raml
+            example: !include examples/response/population.raml

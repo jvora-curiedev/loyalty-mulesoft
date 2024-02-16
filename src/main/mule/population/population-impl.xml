@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="population-implFlow" doc:id="3bfcef58-9d43-486e-99e9-24fddf9a13c0" >
+		<http:request method="GET" doc:name="Request" doc:id="73e516e9-9580-4c24-866a-3af66f2c1589" config-ref="Population_Http_Req_Config" path="/api/data">
+			<http:query-params ><![CDATA[#[vars.queryParams]]]></http:query-params>
+		</http:request>
+		<ee:transform doc:name="Transform Message" doc:id="a16ef958-b877-4155-9048-ce29d242dbca" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

@@ -1,0 +1,7 @@
+%dw 2.0
+
+type auto_3bfcef58_9d43_486e_99e9_24fddf9a13c0_Output_Variables_queryParams = {|
+  drilldowns: String, 
+  measures: String
+|}
+

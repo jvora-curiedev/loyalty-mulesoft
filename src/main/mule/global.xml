@@ -30,8 +30,11 @@ http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/m
     <apikit:config name="loyalty-management-api-config" api="lc-management-api/lc-management-api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
 	<configuration-properties doc:name="Configuration properties" doc:id="d2cb56a8-3873-4e32-a840-56763c7dd645" file="constants.yaml" />
 	<configuration-properties doc:name="Configuration properties" doc:id="c0351bb7-f01a-47a5-8704-f3b16657e10d" file="config/config.yaml" />
-	<api-gateway:autodiscovery apiId="${api_id}" ignoreBasePath="true" doc:name="API Autodiscovery" doc:id="acbc91af-2b3b-477d-ba74-70e7c49f7635" flowRef="loyalty-management-api-main" />
+	<!-- <api-gateway:autodiscovery apiId="${api_id}" ignoreBasePath="true" doc:name="API Autodiscovery" doc:id="acbc91af-2b3b-477d-ba74-70e7c49f7635" flowRef="loyalty-management-api-main" /> -->
 	<configuration doc:name="Configuration" doc:id="f8f25c9f-5676-4f7d-9b2f-591e2eef1a7d" defaultErrorHandler-ref="global_error_handler" />
+	<http:request-config name="Population_Http_Req_Config" doc:name="HTTP Request configuration" doc:id="567b1f35-9b89-4a96-8dec-173ed731d8b4">
+		<http:request-connection protocol="HTTPS" host="datausa.io"/>
+	</http:request-config>
 	<error-handler name="global_error_handler" doc:id="730584fe-7b9c-427a-bbe2-b6a1b0dc30eb" >
 		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="6fe2fb89-64c1-47da-8603-72cbb2526ba8" type="CONNECTIVITY">
 			<set-variable value="504" doc:name="Set Variable" doc:id="b38c86f8-7770-437d-a021-c9c60ddcd343" variableName="httpStatus"/>

@@ -21,7 +21,7 @@
             <ee:variables>
                 <ee:set-variable variableName="requestAttributes"><![CDATA[%dw 2.0
 output application/java
----the file types are either a language with a known grammar or yaml, json or xml.
+---
 attributes]]></ee:set-variable>
             </ee:variables>
         </ee:transform>
@@ -92,8 +92,20 @@ output application/java
 attributes]]></ee:set-variable>
             </ee:variables>
         </ee:transform>
-		<logger level="INFO" doc:name="INFO: Request Received" doc:id="fb9fc5e1-04f4-4b7e-85bc-6e6bf1305d33" message="Received a request in get:\members\(memberId)\vouchers:loyalty-management-api-config" />
-		<flow-ref doc:name="get-vouchers-flow" doc:id="737310ad-70d2-4fb2-aa05-fe60825b8c77" name="get-vouchers-flow" />
-		<logger level="INFO" doc:name="INFO: Request Completed" doc:id="bc0bf97e-c997-431a-a608-d0e2cd7749e2" message="Request completed successfully in get:\members\(memberId)\vouchers:loyalty-management-api-config" />
+        <logger level="INFO" doc:name="INFO: Request Received" doc:id="fb9fc5e1-04f4-4b7e-85bc-6e6bf1305d33" message="Received a request in get:\members\(memberId)\vouchers:loyalty-management-api-config" />
+        <flow-ref doc:name="get-vouchers-flow" doc:id="737310ad-70d2-4fb2-aa05-fe60825b8c77" name="get-vouchers-flow" />
+        <logger level="INFO" doc:name="INFO: Request Completed" doc:id="bc0bf97e-c997-431a-a608-d0e2cd7749e2" message="Request completed successfully in get:\members\(memberId)\vouchers:loyalty-management-api-config" />
+    </flow>
+    <flow name="get:\population:loyalty-management-api-config">
+        <logger level="INFO" doc:name="INFO: Request Received" doc:id="3e0290e9-5421-4985-a79a-f5ff27ba2563" message="Received a request in get:\population:loyalty-management-api-config" />
+		<ee:transform doc:name="Transform Message" doc:id="4fb4a6f0-a536-4292-9521-4be59a5d67e6" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="queryParams" ><![CDATA[attributes.queryParams]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<flow-ref doc:name="population-implFlow" doc:id="6e3f91d9-5b51-4027-bf75-2b2b06592714" name="population-implFlow"/>
+		<logger level="INFO" doc:name="INFO: Request Completed" doc:id="f9b448d9-ba7d-4266-8732-022aaa5c1fea" message="Request completed successfully in get:\population:loyalty-management-api-config" />
     </flow>
 </mule>

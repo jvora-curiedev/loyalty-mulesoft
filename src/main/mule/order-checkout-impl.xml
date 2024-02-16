@@ -26,7 +26,7 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 			<logger level="DEBUG" doc:name="DEBUG: Outbound Response" doc:id="e39697fc-df3a-49db-9f6f-33e64d0b68c3" message="Token retrieved successfully"/>
 		</ee:cache>
 	</sub-flow>
-	<flow name="process-orders-flow" doc:id="8251a1be-cc8f-4993-8c2c-d4438917c59c" >
+	<flow name="process-orders-flow" doc:id="8251a1be-cc8f-4993-8c2c-d4438917c59c" initialState="stopped">
 		<scheduler doc:name="Scheduler" doc:id="ada6498c-9d14-4753-9088-3d16b4e654e2" >
 			<scheduling-strategy >
 				<fixed-frequency frequency="${scheduler.frequency}" startDelay="${scheduler.start_delay}" />

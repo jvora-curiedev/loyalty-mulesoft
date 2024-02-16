@@ -66,6 +66,17 @@ resourceTypes:
               example: |
                 <<postOrdersResponseExampleReference>>
 
+  populationCollection:    
+    get?:
+      displayName: <<populationGetDisplayName>>
+      description: Resource used to retreive member details
+      responses:
+        200:
+          body:
+            application/json:
+              type: <<getPopulationResponseTypeReference>>
+              example: | 
+                <<getPopulationResponseExampleReference>>
 
 
     

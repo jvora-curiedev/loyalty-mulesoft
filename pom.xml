@@ -7,7 +7,7 @@
 	<version>1.0.1</version>
 	<packaging>mule-application</packaging>
 
-	<name>Loyalty Management POS API Powered by MuleSoft</name>
+	<name>lc-management-api</name>
 	<description>Mule application for integrating Shopify POS with Salesforce</description>
 
 	<properties>
@@ -32,7 +32,7 @@
 				<version>${mule.maven.plugin.version}</version>
 				<extensions>true</extensions>
 				<configuration>
-					<classifier>mule-application-example</classifier>
+					<classifier>mule-application</classifier>
 				</configuration>
 			</plugin>
 			<plugin>
