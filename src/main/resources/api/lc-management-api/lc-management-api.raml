@@ -37,21 +37,7 @@ types:
   get:
     is: [member-query-params]
     description: Retrieves member details based on the membershipNumber, membershipId, or posMemId properties.
-  
-  /{membershipNumber}/vouchers:
-      uriParameters:
-        membershipNumber:
-          description: Unique identifier of the member whose vouchers are being retrieved. 
-      type: {
-              resources.vouchersCollection: {
-                getVouchersResponseExampleReference: !include examples/response/vouchers.raml,
-                getVouchersResponseExampleType: !include data-types/response/vouchers.raml,
-                vouchersGetDisplayName: Retrieve voucher details
-              }
-        }
-      get:
-        description: Retrieves voucher details based on the voucherStatus, productId, productName, productCategoryId, and productCategoryName properties. If there’s no search query parameter, this API retrieves all the vouchers.
-        
+          
 /orders:
   type: {
           resources.ordersCollection: {

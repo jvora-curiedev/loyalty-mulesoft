@@ -82,18 +82,4 @@ output application/json
         </ee:transform>
         <logger level="INFO" doc:name="INFO: Request Completed" doc:id="354c2631-d138-4f17-ae37-7c9d914709a1" message="Request completed successfully in post:\orders:application\json:loyalty-management-api-config" />
     </flow>
-    <flow name="get:\members\(membershipNumber)\vouchers:loyalty-management-api-config" doc:id="ed2aae0b-0adc-43ed-ac51-b0e6db0f252e">
-        <ee:transform doc:name="Request Attributes">
-            <ee:variables>
-                <ee:set-variable variableName="membershipNumber"><![CDATA[attributes.uriParams.'membershipNumber']]></ee:set-variable>
-                <ee:set-variable variableName="requestAttributes"><![CDATA[%dw 2.0
-output application/java
----
-attributes]]></ee:set-variable>
-            </ee:variables>
-        </ee:transform>
-		<logger level="INFO" doc:name="INFO: Request Received" doc:id="fb9fc5e1-04f4-4b7e-85bc-6e6bf1305d33" message="Received a request in get:\members\(memberId)\vouchers:loyalty-management-api-config" />
-		<flow-ref doc:name="get-vouchers-flow" doc:id="737310ad-70d2-4fb2-aa05-fe60825b8c77" name="get-vouchers-flow" />
-		<logger level="INFO" doc:name="INFO: Request Completed" doc:id="bc0bf97e-c997-431a-a608-d0e2cd7749e2" message="Request completed successfully in get:\members\(memberId)\vouchers:loyalty-management-api-config" />
-    </flow>
 </mule>
