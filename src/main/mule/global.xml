@@ -63,7 +63,9 @@ http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/m
 					<set-variable value="500" doc:name="HTTP Response Status" doc:id="4137ad1b-c56a-48b3-877b-590641623f40" variableName="httpStatus"/>
 				</otherwise>
 			</choice>
-			<logger level="INFO" doc:name="Logger" doc:id="768ac65c-8866-433c-962b-5e8f14a69ef8" message="#[vars.httpStatus]"/>
+			<async doc:name="Async" doc:id="444edecf-db8d-4b04-a682-78361a99e1d1" >
+				<logger level="INFO" doc:name="Logger" doc:id="768ac65c-8866-433c-962b-5e8f14a69ef8" message="#[vars.httpStatus]" />
+			</async>
 			<flow-ref doc:name="Flow Reference" doc:id="e1a2e940-c9aa-478c-a5fe-6a15195d1bd4" name="Generate_Error_Response"/>
 		</on-error-propagate>
 		
@@ -80,6 +82,8 @@ output application/json
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<logger level="ERROR" doc:name="Logger" doc:id="38696450-bd04-47f1-9dc2-9bebefe556e5" message='#[payload]'/>
+		<async doc:name="Async" doc:id="fe623d51-ff5a-41e3-bef6-c5a76ecbd20f" >
+			<logger level="ERROR" doc:name="Logger" doc:id="38696450-bd04-47f1-9dc2-9bebefe556e5" message="#[payload]" />
+		</async>
 	</sub-flow>
 </mule>

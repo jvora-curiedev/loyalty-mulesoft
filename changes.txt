@@ -1,11 +1,8 @@
-Feature: Remove get members by query params from loyalty management api flow 
-Story description: 
-Remove the endpoint get members by query params from Raml, code, munits and from the repository. 
+Feature: Add async scope for the logger so that the logging is done asynchronously. 
+
  
 Sub tasks: 
 	 
-
-Sub-task 
 
 
 RAML-Design 
@@ -14,4 +11,4 @@ Munits
 Deployment 
 Documentation
 
-Removed endpoint from aml, implementation and munits.
+Mke sure logger is loging asynchronously

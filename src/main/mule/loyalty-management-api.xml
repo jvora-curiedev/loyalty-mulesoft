@@ -25,9 +25,13 @@ output application/java
 attributes]]></ee:set-variable>
             </ee:variables>
         </ee:transform>
-        <logger level="INFO" doc:name="INFO: Request Received" doc:id="e2d00527-6b90-493a-8cf3-f99210224ab1" message="Received a request in get:\members:loyalty-management-api-config" />
+        <async doc:name="Async" doc:id="0afc4d86-2c3e-4657-9971-04560483591e" >
+			<logger level="INFO" doc:name="INFO: Request Received" doc:id="e2d00527-6b90-493a-8cf3-f99210224ab1" message="Received a request in get:\members:loyalty-management-api-config" />
+		</async>
         <flow-ref doc:name="get-member-by-queryparams-flow" doc:id="210110da-4300-4d99-9a81-aeb099b3dda8" name="get-member-by-queryparams-flow" />
-        <logger level="INFO" doc:name="INFO: Request Completed" doc:id="4d31c128-0ec0-4287-b7b8-f0a93cc94654" message="Request completed successfully in get:\members:loyalty-management-api-config" />
+        <async doc:name="Async" doc:id="4b68ccc7-2034-4dd7-942a-a255be4e9067" >
+			<logger level="INFO" doc:name="INFO: Request Completed" doc:id="4d31c128-0ec0-4287-b7b8-f0a93cc94654" message="Request completed successfully in get:\members:loyalty-management-api-config" />
+		</async>
     </flow>
     <flow name="post:\members:application\json:loyalty-management-api-config" doc:id="f754c180-2bd2-4900-bc3f-f77ff12c87d4">
         <ee:transform doc:name="Request Attributes" doc:id="08a0ac43-9496-4bc1-bb08-34e177064ebe">
@@ -48,9 +52,13 @@ output application/json
 payload]]></ee:set-variable>
             </ee:variables>
         </ee:transform>
-        <logger level="INFO" message="Received a request in post:\members:application\json:loyalty-management-api-config flow" doc:name="INFO: Request Received" />
+        <async doc:name="Async" doc:id="d8837d41-52de-4bdb-8ad2-a98601db360c" >
+			<logger level="INFO" message="Received a request in post:\members:application\json:loyalty-management-api-config flow" doc:name="INFO: Request Received" />
+		</async>
         <flow-ref doc:name="member-enrollment-flow" doc:id="7110ff91-27bd-41da-85b5-522e50a52264" name="member-enrollment-flow" />
-        <logger level="INFO" doc:name="INFO: Request Completed" doc:id="55489ecf-122a-4cb3-9741-4f30bf4b1816" message="Request completed successfully in post:\members:application\json:loyalty-management-api-config flow" />
+        <async doc:name="Async" doc:id="534037be-bbd3-45ce-bddc-09517d8f5942" >
+			<logger level="INFO" doc:name="INFO: Request Completed" doc:id="55489ecf-122a-4cb3-9741-4f30bf4b1816" message="Request completed successfully in post:\members:application\json:loyalty-management-api-config flow" />
+		</async>
     </flow>
     <flow name="get:\members\(memberId):loyalty-management-api-config" doc:id="be9881a2-1ca9-4f3a-840f-e3210c1b1fa3">
         <ee:transform doc:name="Request Attributes" doc:id="03b4113c-44c2-483f-a5ae-d2ca2053db8f">
@@ -62,13 +70,19 @@ output application/java
 attributes]]></ee:set-variable>
             </ee:variables>
         </ee:transform>
-        <logger level="INFO" doc:name="INFO: Request Received" doc:id="ba431613-4b5c-4ca9-8217-5d10ce06182b" message="Received a request in get:\members\(memberId):loyalty-management-api-config flow" />
+        <async doc:name="Async" doc:id="bb7d5762-9443-4592-a1b3-884cc37fc79d" >
+			<logger level="INFO" doc:name="INFO: Request Received" doc:id="ba431613-4b5c-4ca9-8217-5d10ce06182b" message="Received a request in get:\members\(memberId):loyalty-management-api-config flow" />
+		</async>
         <flow-ref doc:name="get-member-by-id-flow" doc:id="c08afbe4-0120-4ff3-8ec6-f026d4d322c4" name="get-member-by-id-flow" />
-        <logger level="INFO" message="Request completed successfully in get:\members\(memberId):loyalty-management-api-config flow" doc:name="INFO: Request Completed" />
+        <async doc:name="Async" doc:id="5a759b8e-7597-4fd6-8890-b8f8cc28252d" >
+			<logger level="INFO" message="Request completed successfully in get:\members\(memberId):loyalty-management-api-config flow" doc:name="INFO: Request Completed" />
+		</async>
     </flow>
     <flow name="post:\orders:application\json:loyalty-management-api-config" doc:id="0d6e34f8-8e2f-4b9b-9c99-b0d066258f5a">
         <logger level="INFO" doc:name="INFO: Request Received" doc:id="2865220b-6fe8-4c40-a546-91455c847d4a" message="Received a request in post:\orders:application\json:loyalty-management-api-config" />
-        <flow-ref doc:name="order-publish-flow" doc:id="b2f0b0e3-1c94-4ac2-bcec-98d5115d1705" name="order-publish-flow" />
+        <async doc:name="Async" doc:id="dad94abe-96cd-4e81-8cd4-67b518f97619" >
+			<flow-ref doc:name="order-publish-flow" doc:id="b2f0b0e3-1c94-4ac2-bcec-98d5115d1705" name="order-publish-flow" />
+		</async>
         <ee:transform doc:name="Transform Message" doc:id="4cfe2a66-a1fc-4f86-a369-b09171b0a50c">
             <ee:message>
                 <ee:set-payload><![CDATA[%dw 2.0
@@ -80,6 +94,8 @@ output application/json
 }]]></ee:set-payload>
             </ee:message>
         </ee:transform>
-        <logger level="INFO" doc:name="INFO: Request Completed" doc:id="354c2631-d138-4f17-ae37-7c9d914709a1" message="Request completed successfully in post:\orders:application\json:loyalty-management-api-config" />
+        <async doc:name="Async" doc:id="8408286d-75c5-4a04-8270-2d3e370c7188" >
+			<logger level="INFO" doc:name="INFO: Request Completed" doc:id="354c2631-d138-4f17-ae37-7c9d914709a1" message="Request completed successfully in post:\orders:application\json:loyalty-management-api-config" />
+		</async>
     </flow>
 </mule>
