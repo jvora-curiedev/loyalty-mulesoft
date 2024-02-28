@@ -1,0 +1,17 @@
+Feature: Remove get members by query params from loyalty management api flow 
+Story description: 
+Remove the endpoint get members by query params from Raml, code, munits and from the repository. 
+ 
+Sub tasks: 
+	 
+
+Sub-task 
+
+
+RAML-Design 
+Implementation 
+Munits 
+Deployment 
+Documentation
+
+Removed endpoint from aml, implementation and munits.
