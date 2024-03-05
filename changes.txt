@@ -1,0 +1,15 @@
+Feature:
+Add get member implementation flow.
+Endpoint : /members
+Method: GET
+Request:
+	queryParameters: 
+		membershipNumber: string
+		memberId: string
+		posMem: string
+
+Backend system details to be called:
+	protocol:HTTPS
+	host: domain
+	SalesforceEndpoint: /apexrest/{namespace}/pos/v1/members
+	Authentication: oauth
