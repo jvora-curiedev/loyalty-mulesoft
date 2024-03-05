@@ -38,6 +38,19 @@ payload]]></ee:set-variable>
         <flow-ref doc:name="member-enrollment-flow" doc:id="7110ff91-27bd-41da-85b5-522e50a52264" name="member-enrollment-flow" />
         <logger level="INFO" doc:name="INFO: Request Completed" doc:id="55489ecf-122a-4cb3-9741-4f30bf4b1816" message="Request completed successfully in post:\members:application\json:loyalty-management-api-config flow" />
     </flow>
+    <flow name="get:\members\(memberId):loyalty-management-api-config" doc:id="1f440ae8-a19f-472d-b954-492aab665b88">
+<ee:transform doc:name="Request Attributes" doc:id="0c63a6e3-0b4e-48a7-90d9-dc50cab1315a">
+<ee:message/>
+<ee:variables>
+<ee:set-variable variableName="requestAttributes">
+<![CDATA[ %dw 2.0 output application/java --- attributes ]]>
+</ee:set-variable>
+</ee:variables>
+</ee:transform>
+<logger level="INFO" doc:name="INFO: Request Received" doc:id="e6544ae5-d3d2-40a4-aa88-cf9be480ac3b" message="Received a request in get:\members\(memberId):loyalty-management-api-config flow"/>
+<flow-ref doc:name="get-member-by-id-flow" doc:id="bef82e5d-55ed-4144-888e-36ccae7a0a0b" name="get-member-by-id-flow"/>
+<logger level="INFO" message="Request completed successfully in get:\members\(memberId):loyalty-management-api-config flow" doc:name="INFO: Request Completed"/>
+</flow>
     <flow name="post:\orders:application\json:loyalty-management-api-config" doc:id="0d6e34f8-8e2f-4b9b-9c99-b0d066258f5a">
         <logger level="INFO" doc:name="INFO: Request Received" doc:id="2865220b-6fe8-4c40-a546-91455c847d4a" message="Received a request in post:\orders:application\json:loyalty-management-api-config" />
         <flow-ref doc:name="order-publish-flow" doc:id="b2f0b0e3-1c94-4ac2-bcec-98d5115d1705" name="order-publish-flow" />

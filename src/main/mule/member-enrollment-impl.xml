@@ -1,137 +1,282 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <mule xmlns:os="http://www.mulesoft.org/schema/mule/os"
-	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
 	xmlns="http://www.mulesoft.org/schema/mule/core"
-	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
 http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
-	<flow name="member-enrollment-flow" doc:id="66370b34-8da7-4c81-ae32-21860de23ab2">
-		<until-successful maxRetries="${until.successful.maxretries}" doc:name="Retry" doc:id="c109a60f-9016-450a-8463-c8604b083ad4" millisBetweenRetries="${until.successful.timebetween}">
+	<flow name="member-enrollment-flow"
+		doc:id="66370b34-8da7-4c81-ae32-21860de23ab2">
+		<until-successful
+			maxRetries="${until.successful.maxretries}" doc:name="Retry"
+			doc:id="c109a60f-9016-450a-8463-c8604b083ad4"
+			millisBetweenRetries="${until.successful.timebetween}">
 			<try doc:name="Try" doc:id="f6e80c75-7d99-4d3f-9740-79b234a5ae7c">
-			<logger level="DEBUG" doc:name="DEBUG: Outbound Request" doc:id="89d8ee00-8692-482f-8aa9-14a655da966a" message="Sending request to member enrollment API." />
-				<http:request method="POST" doc:name="Member Enrollment API" doc:id="8ed873e7-a485-42ab-840f-499962148446" config-ref="member_enrollment_http_request_config" responseTimeout="${response.timeout}" path="${salesforce.apex.member_enroll}">
-			<http:body ><![CDATA[#[vars.requestPayload]]]></http:body>
+				<logger level="DEBUG" doc:name="DEBUG: Outbound Request"
+					doc:id="89d8ee00-8692-482f-8aa9-14a655da966a"
+					message="Sending request to member enrollment API." />
+				<http:request method="POST"
+					doc:name="Member Enrollment API"
+					doc:id="8ed873e7-a485-42ab-840f-499962148446"
+					config-ref="member_enrollment_http_request_config"
+					responseTimeout="${response.timeout}"
+					path="${salesforce.apex.member_enroll}">
+					<http:body><![CDATA[#[vars.requestPayload]]]></http:body>
 					<http:headers><![CDATA[#[output application/java
 ---
 {
 	"Authorization" : "Bearer " ++ ((vars.requestAttributes.headers.authorization) splitBy " ")[1]
 }]]]></http:headers>
-					<http:uri-params ><![CDATA[#[{
+					<http:uri-params><![CDATA[#[{
 	"namespace" : p('salesforce.namespace') default "POSIntegration"
 }]]]></http:uri-params>
-		</http:request>
-			<logger level="DEBUG" doc:name="DEBUG: Outbound Response" doc:id="2ef755d8-7d73-44e1-af53-0cb638c6567f" message="Member enrollment API call completed successfully." />
-				<error-handler>
-				<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="77da1eff-fd15-4474-aaf0-3890cb4c1d14" type="HTTP:CONNECTIVITY, HTTP:TIMEOUT">
-					<logger level="ERROR" doc:name="ERROR: Connectivity or Timeout" doc:id="f1ff3ab4-ba1f-45a9-bef1-1759ba795706" message="#[&quot;Error Occurred while calling member enrollment API, error=&quot; ++ (error.description default '')]" />
-				</on-error-propagate>
-				<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="d5982540-845f-430d-8632-ba9e06f88340">
-						<logger level="ERROR" doc:name="ERROR: Bad Request" doc:id="1096baef-a37a-40e7-9b11-8053330ed2aa" message="Non retryable error, #[error.description]"/>
-						<ee:transform doc:name="Error Message" doc:id="567cec11-3e36-48e2-991a-d8e52f3938d3" >
-							<ee:message >
-								<ee:set-payload ><![CDATA[%dw 2.0
-output application/json
----
-error.errorMessage.payload[0]]]></ee:set-payload>
-							</ee:message>
-							<ee:variables >
-								<ee:set-variable variableName="httpStatus" ><![CDATA[%dw 2.0
-output application/java
----
-error.errorMessage.attributes.statusCode]]></ee:set-variable>
-							</ee:variables>
-						</ee:transform>
-						<logger level="ERROR" doc:name="ERROR: Error Response Payload" doc:id="5f745aa6-326b-4301-8500-d64176140f14" message="Error Response Payload #[payload]"/>
-
-				</on-error-continue>
-			
-</error-handler>
-		</try>
-		</until-successful>
-	
-</flow>
-	<flow name="get-member-by-queryparams-flow" doc:id="f707bb6b-edc1-40c7-a999-5d171476a4ef" >
-		<until-successful maxRetries="${until.successful.maxretries}" doc:name="Retry" doc:id="42779be4-704f-4046-8512-2de6ceeb6b55" millisBetweenRetries="${until.successful.timebetween}" >
-			<try doc:name="Try" doc:id="b90e9267-e9dd-4fbb-84b3-cce8df57498c" >
-				<logger level="DEBUG" doc:name="DEBUG: Outbound Request" doc:id="685c0bd8-112d-43e8-b744-4f187cbf1ed3" message="Sending request to member enrollment API." />
-				<http:request method="GET" doc:name="Retrieve Member Profile Details" doc:id="8c4c66ee-1665-4eae-b0bc-2b568938f504" config-ref="member_enrollment_http_request_config" path="${salesforce.apex.member_details_by_query_params}" >
-					<http:headers ><![CDATA[#[output application/java
----
-{
-	"Authorization" : "Bearer " ++ ((vars.requestAttributes.headers.authorization) splitBy " ")[1]
-}]]]></http:headers>
-					<http:uri-params ><![CDATA[#[{
-	"namespace" : p('salesforce.namespace') default "POSIntegration"
-}]]]></http:uri-params>
-					<http:query-params ><![CDATA[#[vars.requestAttributes.queryParams]]]></http:query-params>
 				</http:request>
-				<logger level="DEBUG" doc:name="DEBUG: Outbound Response" doc:id="cfba6b26-04b3-4434-a11c-e24e56de4fed" message="Member enrollment API call completed successfully." />
-				<error-handler >
-					<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="e0e618f4-501a-4ab2-a9e3-8400b3706fd9" type="HTTP:CONNECTIVITY, HTTP:TIMEOUT" >
-						<logger level="ERROR" doc:name="ERROR: Connectivity or Timeout" doc:id="6a2bb7ee-4c26-45f8-8c81-5bebf8f6b0bb" message="#[&quot;Error Occurred while calling member enrollment API, error=&quot; ++ (error.description default '')]" />
+				<logger level="DEBUG" doc:name="DEBUG: Outbound Response"
+					doc:id="2ef755d8-7d73-44e1-af53-0cb638c6567f"
+					message="Member enrollment API call completed successfully." />
+				<error-handler>
+					<on-error-propagate enableNotifications="true"
+						logException="true" doc:name="On Error Propagate"
+						doc:id="77da1eff-fd15-4474-aaf0-3890cb4c1d14"
+						type="HTTP:CONNECTIVITY, HTTP:TIMEOUT">
+						<logger level="ERROR"
+							doc:name="ERROR: Connectivity or Timeout"
+							doc:id="f1ff3ab4-ba1f-45a9-bef1-1759ba795706"
+							message="#[&quot;Error Occurred while calling member enrollment API, error=&quot; ++ (error.description default '')]" />
 					</on-error-propagate>
-					<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="29fd6281-c16a-448b-91a1-d8d9b8eb82ba" >
-						<logger level="ERROR" doc:name="ERROR: Non Retryable Error" doc:id="58f9a38e-392d-436a-bc26-6abe585c6a4a" message="Non retryable error, #[error.description]" />
-						<ee:transform doc:name="Error Message" doc:id="fbd5d0bb-ead2-4a9b-baeb-154313735061" >
-							<ee:message >
-								<ee:set-payload ><![CDATA[%dw 2.0
+					<on-error-continue enableNotifications="true"
+						logException="true" doc:name="On Error Continue"
+						doc:id="d5982540-845f-430d-8632-ba9e06f88340">
+						<logger level="ERROR" doc:name="ERROR: Bad Request"
+							doc:id="1096baef-a37a-40e7-9b11-8053330ed2aa"
+							message="Non retryable error, #[error.description]" />
+						<ee:transform doc:name="Error Message"
+							doc:id="567cec11-3e36-48e2-991a-d8e52f3938d3">
+							<ee:message>
+								<ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
 error.errorMessage.payload[0]]]></ee:set-payload>
 							</ee:message>
-							<ee:variables >
-								<ee:set-variable variableName="httpStatus" ><![CDATA[%dw 2.0
+							<ee:variables>
+								<ee:set-variable variableName="httpStatus"><![CDATA[%dw 2.0
 output application/java
 ---
 error.errorMessage.attributes.statusCode]]></ee:set-variable>
 							</ee:variables>
 						</ee:transform>
-						<logger level="ERROR" doc:name="ERROR: Error Response Payload" doc:id="53de2224-bdef-4978-8445-ddda914cbbfb" message="Error Response Payload #[payload]" />
+						<logger level="ERROR"
+							doc:name="ERROR: Error Response Payload"
+							doc:id="5f745aa6-326b-4301-8500-d64176140f14"
+							message="Error Response Payload #[payload]" />
+
+					</on-error-continue>
+
+				</error-handler>
+			</try>
+		</until-successful>
+
+	</flow>
+	<flow name="get-member-by-id-flow"
+		doc:id="7cc077e2-21c1-41fc-b24e-59c3140fbfc9">
+		<until-successful
+			maxRetries="${until.successful.maxretries}" doc:name="Retry"
+			doc:id="5bb26ce7-eef3-4be9-ba7a-0e7e76c22b79"
+			millisBetweenRetries="${until.successful.timebetween}">
+			<try doc:name="Try" doc:id="26bb1b0d-22aa-4e2e-80ad-ade7972768cc">
+				<logger level="DEBUG" doc:name="DEBUG: Outbound Request"
+					doc:id="865995cf-e16a-4ca3-bc8c-ba7544b84388"
+					message="Sending request to member enrollment API." />
+				<http:request method="GET"
+					doc:name="Retrieve Member Profile Details"
+					doc:id="113936d9-ac2f-45d4-8deb-5281f2517d0c"
+					config-ref="member_enrollment_http_request_config"
+					path="${salesforce.apex.member_details_by_id}">
+					<http:headers>
+<![CDATA[ #[output application/java --- { "Authorization" : "Bearer " ++ ((vars.requestAttributes.headers.authorization) splitBy " ")[1] }] ]]>
+</http:headers>
+					<http:uri-params>
+<![CDATA[ #[{ "memberId" : vars.requestAttributes.uriParams.'memberId', "namespace" : p('salesforce.namespace') default "POSIntegration" }] ]]>
+</http:uri-params>
+				</http:request>
+				<logger level="DEBUG" doc:name="DEBUG: Outbound Response"
+					doc:id="969b2175-2bf0-43cd-8d90-26fa13c50432"
+					message="Member enrollment API call completed successfully." />
+				<error-handler>
+					<on-error-propagate enableNotifications="true"
+						logException="true" doc:name="On Error Propagate"
+						doc:id="fd03e8a1-a5ba-4cc0-9b87-50cfd4d8149a"
+						type="HTTP:CONNECTIVITY, HTTP:TIMEOUT">
+						<logger level="ERROR"
+							doc:name="ERROR: Connectivity or Timeout"
+							doc:id="03f62a11-6c7a-456c-958e-55d69c58097c" message="#[" Error
+							Occurred while calling member enrollment API ,
+							error=" ++ (error.description default '')]" />
+					</on-error-propagate>
+					<on-error-continue enableNotifications="true"
+						logException="true" doc:name="On Error Continue"
+						doc:id="f956ef01-cf11-4197-a20d-58a97682ef60">
+						<logger level="ERROR" doc:name="ERROR: Non Retryable Error"
+							doc:id="ec018586-77da-42b0-8c24-3631d052e21f"
+							message="Non retryable error, #[error.description]" />
+						<ee:transform doc:name="Error Message"
+							doc:id="c49ace54-a2c2-4e16-a7d4-5e1bf6840b25">
+							<ee:message>
+								<ee:set-payload>
+<![CDATA[ %dw 2.0 output application/json --- error.errorMessage.payload[0] ]]>
+								</ee:set-payload>
+							</ee:message>
+							<ee:variables>
+								<ee:set-variable variableName="httpStatus">
+<![CDATA[ %dw 2.0 output application/java --- error.errorMessage.attributes.statusCode ]]>
+								</ee:set-variable>
+							</ee:variables>
+						</ee:transform>
+						<logger level="ERROR"
+							doc:name="ERROR: Error Response Payload"
+							doc:id="ed1b87f6-2cb6-4a1c-93a8-2a7db06b666b"
+							message="Error Response Payload #[payload]" />
 					</on-error-continue>
 				</error-handler>
 			</try>
 		</until-successful>
 	</flow>
-	<flow name="get-vouchers-flow" doc:id="f4080db4-3eb2-4400-8918-1a60d71ca608" >
-		<until-successful maxRetries="${until.successful.maxretries}" doc:name="Retry" doc:id="d771157d-ba41-4a60-acaf-5bd62e5864b6" millisBetweenRetries="${until.successful.timebetween}" >
-			<try doc:name="Try" doc:id="58365737-9dd4-4a39-9d99-6a9f5bf86c69" >
-				<logger level="DEBUG" doc:name="DEBUG: Outbound Request" doc:id="a5275431-91f2-4714-b550-d0e18a6ea0c6" message="Sending request to member enrollment API." />
-				<http:request method="GET" doc:name="Retrieve Vouchers" doc:id="be24f87e-4951-483b-8476-118d3ca43ca2" config-ref="member_enrollment_http_request_config" path="${salesforce.apex.get_vouchers}" >
-					<http:headers ><![CDATA[#[output application/java
+	<flow name="get-member-by-queryparams-flow"
+		doc:id="f707bb6b-edc1-40c7-a999-5d171476a4ef">
+		<until-successful
+			maxRetries="${until.successful.maxretries}" doc:name="Retry"
+			doc:id="42779be4-704f-4046-8512-2de6ceeb6b55"
+			millisBetweenRetries="${until.successful.timebetween}">
+			<try doc:name="Try" doc:id="b90e9267-e9dd-4fbb-84b3-cce8df57498c">
+				<logger level="DEBUG" doc:name="DEBUG: Outbound Request"
+					doc:id="685c0bd8-112d-43e8-b744-4f187cbf1ed3"
+					message="Sending request to member enrollment API." />
+				<http:request method="GET"
+					doc:name="Retrieve Member Profile Details"
+					doc:id="8c4c66ee-1665-4eae-b0bc-2b568938f504"
+					config-ref="member_enrollment_http_request_config"
+					path="${salesforce.apex.member_details_by_query_params}">
+					<http:headers><![CDATA[#[output application/java
 ---
 {
 	"Authorization" : "Bearer " ++ ((vars.requestAttributes.headers.authorization) splitBy " ")[1]
 }]]]></http:headers>
-					<http:uri-params ><![CDATA[#[{	
-	"membershipNumber": vars.membershipNumber,
+					<http:uri-params><![CDATA[#[{
 	"namespace" : p('salesforce.namespace') default "POSIntegration"
 }]]]></http:uri-params>
-					<http:query-params ><![CDATA[#[vars.requestAttributes.queryParams]]]></http:query-params>
+					<http:query-params><![CDATA[#[vars.requestAttributes.queryParams]]]></http:query-params>
 				</http:request>
-				<logger level="DEBUG" doc:name="DEBUG: Outbound Response" doc:id="aa5777bd-9c0e-4c57-8df4-38fa4d068c0c" message="Member enrollment API call completed successfully." />
-				<error-handler >
-					<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="00ca3892-ac56-4811-9eb0-37114b0e7b69" type="HTTP:CONNECTIVITY, HTTP:TIMEOUT" >
-						<logger level="ERROR" doc:name="ERROR: Connectivity or Timeout" doc:id="75b5c600-f573-49f1-8b27-94a345e667b7" message="#[&quot;Error Occurred while calling member enrollment API, error=&quot; ++ (error.description default '')]" />
+				<logger level="DEBUG" doc:name="DEBUG: Outbound Response"
+					doc:id="cfba6b26-04b3-4434-a11c-e24e56de4fed"
+					message="Member enrollment API call completed successfully." />
+				<error-handler>
+					<on-error-propagate enableNotifications="true"
+						logException="true" doc:name="On Error Propagate"
+						doc:id="e0e618f4-501a-4ab2-a9e3-8400b3706fd9"
+						type="HTTP:CONNECTIVITY, HTTP:TIMEOUT">
+						<logger level="ERROR"
+							doc:name="ERROR: Connectivity or Timeout"
+							doc:id="6a2bb7ee-4c26-45f8-8c81-5bebf8f6b0bb"
+							message="#[&quot;Error Occurred while calling member enrollment API, error=&quot; ++ (error.description default '')]" />
 					</on-error-propagate>
-					<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="5c5b2a21-db6f-4466-9bc3-bf27149a5ee1" >
-						<logger level="ERROR" doc:name="ERROR: Non Retryable Error" doc:id="bf5a9117-023a-4adb-9cd9-18a7fd532cf8" message="Non retryable error, #[error.description]" />
-						<ee:transform doc:name="Error Message" doc:id="5e018007-52fb-4361-a0bb-c1e6d3cab431" >
-							<ee:message >
-								<ee:set-payload ><![CDATA[%dw 2.0
+					<on-error-continue enableNotifications="true"
+						logException="true" doc:name="On Error Continue"
+						doc:id="29fd6281-c16a-448b-91a1-d8d9b8eb82ba">
+						<logger level="ERROR" doc:name="ERROR: Non Retryable Error"
+							doc:id="58f9a38e-392d-436a-bc26-6abe585c6a4a"
+							message="Non retryable error, #[error.description]" />
+						<ee:transform doc:name="Error Message"
+							doc:id="fbd5d0bb-ead2-4a9b-baeb-154313735061">
+							<ee:message>
+								<ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
 error.errorMessage.payload[0]]]></ee:set-payload>
 							</ee:message>
-							<ee:variables >
-								<ee:set-variable variableName="httpStatus" ><![CDATA[%dw 2.0
+							<ee:variables>
+								<ee:set-variable variableName="httpStatus"><![CDATA[%dw 2.0
 output application/java
 ---
 error.errorMessage.attributes.statusCode]]></ee:set-variable>
 							</ee:variables>
 						</ee:transform>
-						<logger level="ERROR" doc:name="ERROR: Error Response Payload" doc:id="c864f8f7-7288-48ab-8c78-287e9dea6daa" message="Error Response Payload #[payload]" />
+						<logger level="ERROR"
+							doc:name="ERROR: Error Response Payload"
+							doc:id="53de2224-bdef-4978-8445-ddda914cbbfb"
+							message="Error Response Payload #[payload]" />
+					</on-error-continue>
+				</error-handler>
+			</try>
+		</until-successful>
+	</flow>
+	<flow name="get-vouchers-flow"
+		doc:id="f4080db4-3eb2-4400-8918-1a60d71ca608">
+		<until-successful
+			maxRetries="${until.successful.maxretries}" doc:name="Retry"
+			doc:id="d771157d-ba41-4a60-acaf-5bd62e5864b6"
+			millisBetweenRetries="${until.successful.timebetween}">
+			<try doc:name="Try" doc:id="58365737-9dd4-4a39-9d99-6a9f5bf86c69">
+				<logger level="DEBUG" doc:name="DEBUG: Outbound Request"
+					doc:id="a5275431-91f2-4714-b550-d0e18a6ea0c6"
+					message="Sending request to member enrollment API." />
+				<http:request method="GET" doc:name="Retrieve Vouchers"
+					doc:id="be24f87e-4951-483b-8476-118d3ca43ca2"
+					config-ref="member_enrollment_http_request_config"
+					path="${salesforce.apex.get_vouchers}">
+					<http:headers><![CDATA[#[output application/java
+---
+{
+	"Authorization" : "Bearer " ++ ((vars.requestAttributes.headers.authorization) splitBy " ")[1]
+}]]]></http:headers>
+					<http:uri-params><![CDATA[#[{	
+	"membershipNumber": vars.membershipNumber,
+	"namespace" : p('salesforce.namespace') default "POSIntegration"
+}]]]></http:uri-params>
+					<http:query-params><![CDATA[#[vars.requestAttributes.queryParams]]]></http:query-params>
+				</http:request>
+				<logger level="DEBUG" doc:name="DEBUG: Outbound Response"
+					doc:id="aa5777bd-9c0e-4c57-8df4-38fa4d068c0c"
+					message="Member enrollment API call completed successfully." />
+				<error-handler>
+					<on-error-propagate enableNotifications="true"
+						logException="true" doc:name="On Error Propagate"
+						doc:id="00ca3892-ac56-4811-9eb0-37114b0e7b69"
+						type="HTTP:CONNECTIVITY, HTTP:TIMEOUT">
+						<logger level="ERROR"
+							doc:name="ERROR: Connectivity or Timeout"
+							doc:id="75b5c600-f573-49f1-8b27-94a345e667b7"
+							message="#[&quot;Error Occurred while calling member enrollment API, error=&quot; ++ (error.description default '')]" />
+					</on-error-propagate>
+					<on-error-continue enableNotifications="true"
+						logException="true" doc:name="On Error Continue"
+						doc:id="5c5b2a21-db6f-4466-9bc3-bf27149a5ee1">
+						<logger level="ERROR" doc:name="ERROR: Non Retryable Error"
+							doc:id="bf5a9117-023a-4adb-9cd9-18a7fd532cf8"
+							message="Non retryable error, #[error.description]" />
+						<ee:transform doc:name="Error Message"
+							doc:id="5e018007-52fb-4361-a0bb-c1e6d3cab431">
+							<ee:message>
+								<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+error.errorMessage.payload[0]]]></ee:set-payload>
+							</ee:message>
+							<ee:variables>
+								<ee:set-variable variableName="httpStatus"><![CDATA[%dw 2.0
+output application/java
+---
+error.errorMessage.attributes.statusCode]]></ee:set-variable>
+							</ee:variables>
+						</ee:transform>
+						<logger level="ERROR"
+							doc:name="ERROR: Error Response Payload"
+							doc:id="c864f8f7-7288-48ab-8c78-287e9dea6daa"
+							message="Error Response Payload #[payload]" />
 					</on-error-continue>
 				</error-handler>
 			</try>
