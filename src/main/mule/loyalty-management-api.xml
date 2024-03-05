@@ -15,20 +15,6 @@
             <apikit:router config-ref="loyalty-management-api-config" />
         </tracing:with-correlation-id>
     </flow>
-    <flow name="get:\members:loyalty-management-api-config">
-        <ee:transform doc:name="Request Attributes" doc:id="6b259fa5-42f7-41fa-86c7-9e85a02414a1">
-            <ee:message />
-            <ee:variables>
-                <ee:set-variable variableName="requestAttributes"><![CDATA[%dw 2.0
-output application/java
----the file types are either a language with a known grammar or yaml, json or xml.
-attributes]]></ee:set-variable>
-            </ee:variables>
-        </ee:transform>
-        <logger level="INFO" doc:name="INFO: Request Received" doc:id="e2d00527-6b90-493a-8cf3-f99210224ab1" message="Received a request in get:\members:loyalty-management-api-config" />
-        <flow-ref doc:name="get-member-by-queryparams-flow" doc:id="210110da-4300-4d99-9a81-aeb099b3dda8" name="get-member-by-queryparams-flow" />
-        <logger level="INFO" doc:name="INFO: Request Completed" doc:id="4d31c128-0ec0-4287-b7b8-f0a93cc94654" message="Request completed successfully in get:\members:loyalty-management-api-config" />
-    </flow>
     <flow name="post:\members:application\json:loyalty-management-api-config" doc:id="f754c180-2bd2-4900-bc3f-f77ff12c87d4">
         <ee:transform doc:name="Request Attributes" doc:id="08a0ac43-9496-4bc1-bb08-34e177064ebe">
             <ee:message>
