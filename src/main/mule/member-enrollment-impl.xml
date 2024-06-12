@@ -113,10 +113,8 @@ error.errorMessage.attributes.statusCode]]></ee:set-variable>
 						doc:id="fd03e8a1-a5ba-4cc0-9b87-50cfd4d8149a"
 						type="HTTP:CONNECTIVITY, HTTP:TIMEOUT">
 						<logger level="ERROR"
-							doc:name="ERROR: Connectivity or Timeout"
-							doc:id="03f62a11-6c7a-456c-958e-55d69c58097c" message="#[" Error
-							Occurred while calling member enrollment API ,
-							error=" ++ (error.description default '')]" />
+							doc:name="ERROR: Connectivity or Timeout" 
+							doc:id="03f62a11-6c7a-456c-958e-55d69c58097c" message="#['Error Occurred while calling member enrollment API, error=' ++ (error.description default '')]" />
 					</on-error-propagate>
 					<on-error-continue enableNotifications="true"
 						logException="true" doc:name="On Error Continue"
