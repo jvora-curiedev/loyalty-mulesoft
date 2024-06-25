@@ -15,6 +15,14 @@ var payload = vars.requestPayload
      "posOrderCount__c": payload.orders_count
      }
     },
+    "memberAddress": {
+      "address1": payload.address1,
+      "address2": payload.address2,
+      "city": payload.city,
+      "state": payload.state,
+      "zipCode": payload.zipCode
+    },
+    "membershipExpirationDate": now() + |P2Y|,
     "associatedContactDetails":  {
          "firstName": payload.first_name,
          "lastName": payload.last_name,
