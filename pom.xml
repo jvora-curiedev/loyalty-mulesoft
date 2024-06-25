@@ -4,7 +4,7 @@
 
 	<groupId>com</groupId>
 	<artifactId>lc-management-api-impl</artifactId>
-	<version>1.0.1</version>
+	<version>1.0.2</version>
 	<packaging>mule-application</packaging>
 
 	<name>Loyalty Management POS API Powered by MuleSoft</name>
@@ -127,7 +127,14 @@
 			<version>3.1.7</version>
 			<classifier>mule-plugin</classifier>
 		</dependency>
-	</dependencies>
+	<dependency>
+		<groupId>com.mulesoft.connectors</groupId>
+		<artifactId>mule-workday-connector</artifactId>
+		<version>16.1.0</version>
+		<classifier>mule-plugin</classifier>
+	</dependency>
+	
+</dependencies>
 
 	<repositories>
 		<repository>
