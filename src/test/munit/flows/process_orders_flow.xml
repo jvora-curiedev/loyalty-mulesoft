@@ -1,0 +1,200 @@
+
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:os="http://www.mulesoft.org/schema/mule/os"
+xmlns:validation="http://www.mulesoft.org/schema/mule/validation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xsi:schemaLocation="
+    http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+    http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+    http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
+<munit:config name="process_orders_flow.xml" />
+
+<munit:test name="process_orders_flow_2" doc:id="8251a1be-cc8f-4993-8c2c-d4438917c59c" description="Test execution with only placed orders processed.">
+  <munit:behavior>
+    <munit-tools:mock-when doc:name="Mock retrieve-token-subflow" doc:id="ef5973fe-04f1-427a-971a-2bf0bbf044b8" processor="flow-ref">
+      <munit-tools:with-attributes>
+        <munit-tools:with-attribute whereValue="retrieve-token-subflow" attributeName="name"/>
+      </munit-tools:with-attributes>
+      <munit-tools:then-return>
+        <munit-tools:payload value="#[vars.authAccessToken]"/>
+      </munit-tools:then-return>
+    </munit-tools:mock-when>
+    <munit-tools:mock-when doc:name="Mock send-orders-to-salesforce-flow" doc:id="17376d95-a11a-44e5-a564-c639a988c945" processor="flow-ref">
+      <munit-tools:with-attributes>
+        <munit-tools:with-attribute whereValue="send-orders-to-salesforce-flow" attributeName="name"/>
+      </munit-tools:with-attributes>
+    </munit-tools:mock-when>
+    <munit-tools:mock-when doc:name="Mock Anypoint MQ" doc:id="0760232e-6a53-4eaf-b760-724a544e803a" processor="anypoint-mq:consume">
+      <munit-tools:then-return>
+        <munit-tools:payload value="#[output application/json --- readUrl('classpath://examples/qo2s4/placed-orders.json')]"/>
+        <munit-tools:attributes value="#[output application/java --- {ackToken: 'ackToken1'}]"/>
+      </munit-tools:then-return>
+    </munit-tools:mock-when>
+    <munit-tools:mock-when doc:name="Mock error handler" doc:id="83c5f701-fc03-4a30-8911-b5a7bcc2cf46" processor="on-error-continue"/>
+  </munit:behavior>
+  <munit:execution>
+    <flow-ref doc:name="process-orders-flow" doc:id="8251a1be-cc8f-4993-8c2c-d4438917c59c" name="process-orders-flow"/>
+  </munit:execution>
+  <munit:validation>
+    <munit-tools:verify-call doc:name="Verify retrieve-token-subflow call" doc:id="ef5973fe-04f1-427a-971a-2bf0bbf044b8" processor="flow-ref" times="1"/>
+    <munit-tools:verify-call doc:name="Verify send-orders-to-salesforce-flow call" doc:id="17376d95-a11a-44e5-a564-c639a988c945" processor="flow-ref" times="1"/>
+    <munit-tools:verify-call doc:name="Verify Anypoint MQ call" doc:id="0760232e-6a53-4eaf-b760-724a544e803a" processor="anypoint-mq:consume" times="1"/>
+    <munit-tools:verify-call doc:name="Verify error handler not called" doc:id="83c5f701-fc03-4a30-8911-b5a7bcc2cf46" processor="on-error-continue" times="0"/>
+  </munit:validation>
+</munit:test>
+
+<munit:test name="process_orders_flow_3" doc:id="c0d1b5e4-1168-4a87-8fae-d8d2d0d4f0d4" description="Test execution with only cancelled orders processed">
+  <munit:behavior>
+    <munit-tools:mock-when doc:name="Mock retrieve-token-subflow" doc:id="9d7683ca-1883-4a8e-b85d-c8f9b5cdc9e5" processor="flow-ref">
+      <munit-tools:with-attributes>
+        <munit-tools:with-attribute whereValue="ef5973fe-04f1-427a-971a-2bf0bbf044b8" attributeName="doc:id" />
+      </munit-tools:with-attributes>
+      <munit-tools:then-return>
+        <munit-tools:variables>
+          <munit-tools:variable key="authAccessToken" value="#['mocked_token']"/>
+        </munit-tools:variables>
+      </munit-tools:then-return>
+    </munit-tools:mock-when>
+    
+    <munit-tools:mock-when doc:name="Mock send-orders-to-salesforce-flow" doc:id="a8c6d5c5-9c1a-4cd4-a9e0-675b5e31e2cd" processor="flow-ref">
+      <munit-tools:with-attributes>
+        <munit-tools:with-attribute whereValue="a36c20ef-4441-469c-9776-f44d85bb0649" attributeName="doc:id" />
+      </munit-tools:with-attributes>
+    </munit-tools:mock-when>
+    
+    <munit-tools:mock-when doc:name="Mock Anypoint MQ" doc:id="0760232e-6a53-4eaf-b760-724a544e803a" processor="anypoint-mq:consume">
+      <munit-tools:then-return>
+        <munit-tools:payload value="#[MunitTools::getResourceAsString('examples/yxnof/cancelled-orders-payload.json')]" mediaType="application/json" />
+        <munit-tools:attributes value='#[{"ackToken": "mocked_ack_token"}]' />
+      </munit-tools:then-return>
+    </munit-tools:mock-when>
+    
+    <munit-tools:mock-when doc:name="Mock error handler" doc:id="83c5f701-fc03-4a30-8911-b5a7bcc2cf46" processor="on-error-continue"/>
+  </munit:behavior>
+  
+  <munit:execution>
+    <flow-ref doc:name="process-orders-flow" doc:id="8251a1be-cc8f-4993-8c2c-d4438917c59c" name="process-orders-flow"/>
+  </munit:execution>
+  
+  <munit:validation>
+    <munit-tools:verify-call doc:name="Verify retrieve-token-subflow call" doc:id="ef5973fe-04f1-427a-971a-2bf0bbf044b8" processor="flow-ref" times="1"/>
+    <munit-tools:verify-call doc:name="Verify send-orders-to-salesforce-flow call" doc:id="a36c20ef-4441-469c-9776-f44d85bb0649" processor="flow-ref" times="1"/>
+    <munit-tools:verify-call doc:name="Verify Anypoint MQ call" doc:id="0760232e-6a53-4eaf-b760-724a544e803a" processor="anypoint-mq:consume" times="${anypoint.mq.orders.messages_limit}"/>
+    <munit-tools:verify-call doc:name="Verify error handler not called" doc:id="83c5f701-fc03-4a30-8911-b5a7bcc2cf46" processor="on-error-continue" times="0"/>
+  </munit:validation>
+</munit:test>
+
+<munit:test name="process_orders_flow_1" doc:id="d1f4d8f5-8d1b-4216-9c5a-a022b9e53b5d" description="Test execution when there are no messages in the queue (Anypoint MQ Timeout)">
+  <munit:behavior>
+    <munit-tools:mock-when doc:name="Mock retrieve-token-subflow" doc:id="9d7683ca-3f9e-4dd1-8c8a-7daf1f1e6c78" processor="flow-ref">
+      <munit-tools:with-attributes>
+        <munit-tools:with-attribute whereValue="retrieve-token-subflow" attributeName="name" />
+      </munit-tools:with-attributes>
+      <munit-tools:then-return>
+        <munit-tools:payload value="#[vars.authAccessToken]" />
+      </munit-tools:then-return>
+    </munit-tools:mock-when>
+    <munit-tools:mock-when doc:name="Mock Anypoint MQ" doc:id="7c8a99fc-4f8e-4b1a-b086-0d0d4ec5b2fd" processor="anypoint-mq:consume">
+      <munit-tools:with-attributes>
+        <munit-tools:with-attribute whereValue="0760232e-6a53-4eaf-b760-724a544e803a" attributeName="doc:id" />
+      </munit-tools:with-attributes>
+      <munit-tools:then-return>
+        <munit-tools:error typeId="ANYPOINT-MQ:TIMEOUT" />
+      </munit-tools:then-return>
+    </munit-tools:mock-when>
+    <munit-tools:mock-when doc:name="Mock error handler" doc:id="1a3a8e0a-6c22-4da1-b83e-f1d388bda5ce" processor="on-error-continue">
+      <munit-tools:with-attributes>
+        <munit-tools:with-attribute whereValue="83c5f701-fc03-4a30-8911-b5a7bcc2cf46" attributeName="doc:id" />
+      </munit-tools:with-attributes>
+    </munit-tools:mock-when>
+  </munit:behavior>
+  <munit:execution>
+    <flow-ref doc:name="Flow-ref to process-orders-flow" doc:id="8c1e8ced-783f-4e71-b8f3-c87f885dd748" name="process-orders-flow" />
+  </munit:execution>
+  <munit:validation>
+    <munit-tools:verify-call doc:name="Verify retrieve-token-subflow call" doc:id="d169a8c9-05fa-410f-bf1f-1d90f0112a63" processor="flow-ref" times="1">
+      <munit-tools:with-attributes>
+        <munit-tools:with-attribute whereValue="retrieve-token-subflow" attributeName="name" />
+      </munit-tools:with-attributes>
+    </munit-tools:verify-call>
+    <munit-tools:verify-call doc:name="Verify Anypoint MQ call" doc:id="1ecb5a62-e5a5-4907-b50e-f5778fd6a788" processor="anypoint-mq:consume" times="1">
+      <munit-tools:with-attributes>
+        <munit-tools:with-attribute whereValue="0760232e-6a53-4eaf-b760-724a544e803a" attributeName="doc:id" />
+      </munit-tools:with-attributes>
+    </munit-tools:verify-call>
+    <munit-tools:verify-call doc:name="Verify error handler call" doc:id="5e2baa0e-2ac9-4a65-ae5e-e0b7a4fc54a3" processor="on-error-continue" times="1">
+      <munit-tools:with-attributes>
+        <munit-tools:with-attribute whereValue="83c5f701-fc03-4a30-8911-b5a7bcc2cf46" attributeName="doc:id" />
+      </munit-tools:with-attributes>
+    </munit-tools:verify-call>
+    <munit-tools:verify-call doc:name="Verify warning logger call" doc:id="63f0e50a-962d-4e51-8dad-622b046d45f3" processor="logger" times="1">
+      <munit-tools:with-attributes>
+        <munit-tools:with-attribute whereValue="14e0f81e-a824-4d14-8791-121797c24894" attributeName="doc:id" />
+      </munit-tools:with-attributes>
+    </munit-tools:verify-call>
+  </munit:validation>
+</munit:test>
+
+<munit:test name="process_orders_flow_0" doc:id="8251a1be-cc8f-4993-8c2c-d4438917c59c" description="Test successful execution with both placed and cancelled orders processed.">
+  <munit:behavior>
+    <munit-tools:mock-when doc:name="Mock retrieve-token-subflow" doc:id="ef5973fe-04f1-427a-971a-2bf0bbf044b8" processor="flow-ref">
+      <munit-tools:with-attributes>
+        <munit-tools:with-attribute whereValue="retrieve-token-subflow" attributeName="name"/>
+      </munit-tools:with-attributes>
+      <munit-tools:then-return>
+        <munit-tools:payload value="#[vars.authAccessToken]"/>
+      </munit-tools:then-return>
+    </munit-tools:mock-when>
+    <munit-tools:mock-when doc:name="Mock send-orders-to-salesforce-flow" doc:id="17376d95-a11a-44e5-a564-c639a988c945" processor="flow-ref">
+      <munit-tools:with-attributes>
+        <munit-tools:with-attribute whereValue="send-orders-to-salesforce-flow" attributeName="name"/>
+      </munit-tools:with-attributes>
+    </munit-tools:mock-when>
+    <munit-tools:mock-when doc:name="Mock Anypoint MQ - Placed Orders" doc:id="0760232e-6a53-4eaf-b760-724a544e803a" processor="anypoint-mq:consume">
+      <munit-tools:with-attributes>
+        <munit-tools:with-attribute whereValue="Orders" attributeName="doc:name"/>
+      </munit-tools:with-attributes>
+      <munit-tools:then-return>
+        <munit-tools:payload value="#[output application/json --- readUrl('classpath://examples/i9crk/placed-orders.json')]"/>
+        <munit-tools:attributes value="#[{ackToken: 'placedOrdersAckToken'}]"/>
+      </munit-tools:then-return>
+    </munit-tools:mock-when>
+    <munit-tools:mock-when doc:name="Mock Anypoint MQ - Cancelled Orders" doc:id="0760232e-6a53-4eaf-b760-724a544e803a" processor="anypoint-mq:consume">
+      <munit-tools:with-attributes>
+        <munit-tools:with-attribute whereValue="Orders" attributeName="doc:name"/>
+      </munit-tools:with-attributes>
+      <munit-tools:then-return>
+        <munit-tools:payload value="#[output application/json --- readUrl('classpath://examples/i9crk/cancelled-orders.json')]"/>
+        <munit-tools:attributes value="#[{ackToken: 'cancelledOrdersAckToken'}]"/>
+      </munit-tools:then-return>
+    </munit-tools:mock-when>
+    <munit-tools:mock-when doc:name="Mock Error Handler" doc:id="83c5f701-fc03-4a30-8911-b5a7bcc2cf46" processor="on-error-continue">
+      <munit-tools:with-attributes>
+        <munit-tools:with-attribute whereValue="On Error Continue" attributeName="doc:name"/>
+      </munit-tools:with-attributes>
+    </munit-tools:mock-when>
+  </munit:behavior>
+  <munit:execution>
+    <flow-ref doc:name="process-orders-flow" doc:id="8251a1be-cc8f-4993-8c2c-d4438917c59c" name="process-orders-flow"/>
+  </munit:execution>
+  <munit:validation>
+    <munit-tools:verify-call doc:name="Verify retrieve-token-subflow call" doc:id="ef5973fe-04f1-427a-971a-2bf0bbf044b8" processor="flow-ref" times="1"/>
+    <munit-tools:verify-call doc:name="Verify send-orders-to-salesforce-flow call" doc:id="17376d95-a11a-44e5-a564-c639a988c945" processor="flow-ref" times="2"/>
+    <munit-tools:verify-call doc:name="Verify Anypoint MQ call" doc:id="0760232e-6a53-4eaf-b760-724a544e803a" processor="anypoint-mq:consume" times="2"/>
+    <munit-tools:verify-call doc:name="Verify INFO logs" doc:id="28236812-5008-4a43-b93d-6eefd1bfe708" processor="logger" times="3">
+      <munit-tools:with-attributes>
+        <munit-tools:with-attribute whereValue="INFO" attributeName="level"/>
+      </munit-tools:with-attributes>
+    </munit-tools:verify-call>
+    <munit-tools:verify-call doc:name="Verify DEBUG logs" doc:id="0ec6ddd0-ffe6-4ebd-9b14-6d83492f0d8c" processor="logger" times="2">
+      <munit-tools:with-attributes>
+        <munit-tools:with-attribute whereValue="DEBUG" attributeName="level"/>
+      </munit-tools:with-attributes>
+    </munit-tools:verify-call>
+    <munit-tools:verify-call doc:name="Verify error handler not called" doc:id="83c5f701-fc03-4a30-8911-b5a7bcc2cf46" processor="on-error-continue" times="0"/>
+  </munit:validation>
+</munit:test>
+
+</mule>
