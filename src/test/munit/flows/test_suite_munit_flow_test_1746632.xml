@@ -1,0 +1,54 @@
+<?xml version="1.0" ?>
+<mule xmlns:os="http://www.mulesoft.org/schema/mule/os" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:validation="http://www.mulesoft.org/schema/mule/validation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xsi:schemaLocation="     http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd     http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd     http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd     http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
+  <munit:config name="test_suite_munit_flow_test_1746632.xml"/>
+  <munit:test name="test_suite_munit_flow_test_0" description="Test the happy path for the post:\members:application\json:loyalty-management-api-config flow, ensuring that the request is processed, the member-enrollment-flow is invoked, and all loggers and connectors are triggered as expected. All external connectors (HTTP request) are mocked.">
+    <munit:behavior>
+      <!-- Set up initial event with payload and attributes -->
+      <munit:set-event doc:name="Set Event">
+        <munit:payload value="#[MunitTools::getResourceAsString('test_suite_munit_flow_test_1746632/mock_data_scenario_0/request.json')]" mediaType="application/json" encoding="UTF-8"/>
+        <munit:attributes value="#[{                 headers: {                     authorization: 'Bearer test-token'                 }             }]" mediaType="application/java"/>
+      </munit:set-event>
+      <!-- Mock HTTP request in member-enrollment-flow -->
+      <munit-tools:mock-when doc:name="Mock Member Enrollment API" processor="http:request">
+        <munit-tools:with-attributes>
+          <munit-tools:with-attribute whereValue="Member Enrollment API" attributeName="doc:name"/>
+        </munit-tools:with-attributes>
+        <munit-tools:then-return>
+          <munit-tools:payload value="#[MunitTools::getResourceAsString('test_suite_munit_flow_test_1746632/mock_data_scenario_0/response.json')]" mediaType="application/json" encoding="UTF-8"/>
+        </munit-tools:then-return>
+      </munit-tools:mock-when>
+    </munit:behavior>
+    <munit:execution>
+      <flow-ref name="post:\members:application\json:loyalty-management-api-config"/>
+    </munit:execution>
+    <munit:validation>
+      <!-- Verify that initial transform set the variables correctly -->
+      <munit-tools:assert-that doc:name="Assert requestPayload variable" expression="#[vars.requestPayload]" is="#[MunitTools::notNullValue()]"/>
+      <munit-tools:assert-that doc:name="Assert requestAttributes variable" expression="#[vars.requestAttributes]" is="#[MunitTools::notNullValue()]"/>
+      <!-- Verify that first logger was called -->
+      <munit-tools:verify-call doc:name="Verify first logger" processor="logger">
+        <munit-tools:with-attributes>
+          <munit-tools:with-attribute whereValue="INFO: Request Received" attributeName="doc:name"/>
+        </munit-tools:with-attributes>
+      </munit-tools:verify-call>
+      <!-- Verify that HTTP request was called -->
+      <munit-tools:verify-call doc:name="Verify HTTP request" processor="http:request">
+        <munit-tools:with-attributes>
+          <munit-tools:with-attribute whereValue="Member Enrollment API" attributeName="doc:name"/>
+        </munit-tools:with-attributes>
+      </munit-tools:verify-call>
+      <!-- Verify that logger after HTTP request was called -->
+      <munit-tools:verify-call doc:name="Verify logger after HTTP request" processor="logger">
+        <munit-tools:with-attributes>
+          <munit-tools:with-attribute whereValue="DEBUG: Outbound Response" attributeName="doc:name"/>
+        </munit-tools:with-attributes>
+      </munit-tools:verify-call>
+      <!-- Verify that final logger was called -->
+      <munit-tools:verify-call doc:name="Verify final logger" processor="logger">
+        <munit-tools:with-attributes>
+          <munit-tools:with-attribute whereValue="INFO: Request Completed" attributeName="doc:name"/>
+        </munit-tools:with-attributes>
+      </munit-tools:verify-call>
+    </munit:validation>
+  </munit:test>
+</mule>
