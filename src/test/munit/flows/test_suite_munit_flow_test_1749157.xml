@@ -1,0 +1,159 @@
+<?xml version="1.0" ?>
+<mule xmlns:os="http://www.mulesoft.org/schema/mule/os" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:validation="http://www.mulesoft.org/schema/mule/validation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xsi:schemaLocation="     http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd     http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd     http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd     http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
+  <munit:config name="test_suite_munit_flow_test_1749157.xml"/>
+  <munit:test name="test_suite_munit_flow_test_0" description="Test successful member profile retrieval by member ID with successful HTTP response from Salesforce API">
+    <!-- 
+        BEHAVIOR SECTION:
+        - Set the event with attributes containing memberId in uriParams and authorization header.
+        - Mock the HTTP request "Retrieve Member Profile Details" to return a successful member profile response.
+    -->
+    <munit:behavior>
+      <munit:set-event doc:name="Set Event">
+        <munit:payload value="#[null]" mediaType="application/json" encoding="UTF-8"/>
+        <munit:attributes value="#[{                  headers: { authorization: 'Bearer test-access-token' },                  uriParams: { memberId: '675424' }              }]" mediaType="application/java" encoding="UTF-8"/>
+      </munit:set-event>
+      <munit-tools:mock-when processor="http:request">
+        <munit-tools:with-attributes>
+          <munit-tools:with-attribute whereValue="Retrieve Member Profile Details" attributeName="doc:name"/>
+        </munit-tools:with-attributes>
+        <munit-tools:then-return>
+          <munit-tools:payload value="#[MunitTools::getResourceAsString('test_suite_munit_flow_test_1749157/mock_data_scenario_0/member_profile_response.json')]" mediaType="application/json" encoding="UTF-8"/>
+        </munit-tools:then-return>
+      </munit-tools:mock-when>
+    </munit:behavior>
+    <!-- 
+        EXECUTION SECTION:
+        - Execute the flow get:\members\(memberId):loyalty-management-api-config.
+    -->
+    <munit:execution>
+      <flow-ref name="get:\members\(memberId):loyalty-management-api-config"/>
+    </munit:execution>
+    <!-- 
+        VALIDATION SECTION:
+        - Verify that the INFO logger "Request Received" is called.
+        - Verify that the HTTP request "Retrieve Member Profile Details" is called.
+        - Assert that the payload contains the expected member profile data.
+    -->
+    <munit:validation>
+      <munit-tools:verify-call doc:name="Verify INFO: Request Received" processor="logger" times="1">
+        <munit-tools:with-attributes>
+          <munit-tools:with-attribute whereValue="INFO: Request Received" attributeName="doc:name"/>
+        </munit-tools:with-attributes>
+      </munit-tools:verify-call>
+      <munit-tools:verify-call doc:name="Verify HTTP Request" processor="http:request" times="1">
+        <munit-tools:with-attributes>
+          <munit-tools:with-attribute whereValue="Retrieve Member Profile Details" attributeName="doc:name"/>
+        </munit-tools:with-attributes>
+      </munit-tools:verify-call>
+      <munit-tools:assert-equals doc:name="Assert payload equals expected member profile" actual="#[payload]" expected="#[read(MunitTools::getResourceAsString('test_suite_munit_flow_test_1749157/mock_data_scenario_0/member_profile_response.json'), 'application/json')]" message="Payload does not match expected member profile response"/>
+    </munit:validation>
+  </munit:test>
+  <munit:test name="test_suite_munit_flow_test_1" description="Test member profile retrieval with non-retryable error (HTTP:BAD_REQUEST) that triggers on-error-continue" doc:id="test-bad-request-error-handling">
+    <munit:behavior>
+      <!-- Mock the HTTP request to throw HTTP:BAD_REQUEST error -->
+      <munit-tools:mock-when doc:name="Mock HTTP Request - Retrieve Member Profile Details" processor="http:request">
+        <munit-tools:with-attributes>
+          <munit-tools:with-attribute whereValue="Retrieve Member Profile Details" attributeName="doc:name"/>
+        </munit-tools:with-attributes>
+        <munit-tools:then-return>
+          <munit-tools:error typeId="HTTP:BAD_REQUEST"/>
+        </munit-tools:then-return>
+      </munit-tools:mock-when>
+    </munit:behavior>
+    <munit:execution>
+      <!-- Set event with attributes containing memberId in uriParams and authorization header -->
+      <munit:set-event doc:name="Set Event">
+        <munit:attributes value="#[{                 &quot;headers&quot;: {                     &quot;authorization&quot;: &quot;Bearer 00DDn00000C16Vj!AQkAQNgYiQkLn.2W6lpSvt3tiAgNVSh2FTUcVsitW7gJarlJ2SBWwauS3CLOS7gsMr6HpkEr0dxqE5JU6.XpUTDHzNVGiVUJ&quot;,                     &quot;content-type&quot;: &quot;application/json&quot;,                     &quot;accept&quot;: &quot;*/*&quot;                 },                 &quot;method&quot;: &quot;GET&quot;,                 &quot;scheme&quot;: &quot;https&quot;,                 &quot;queryParams&quot;: {},                 &quot;requestUri&quot;: &quot;/api/members/123456789&quot;,                 &quot;queryString&quot;: &quot;&quot;,                 &quot;version&quot;: &quot;HTTP/1.1&quot;,                 &quot;maskedRequestPath&quot;: &quot;/members/123456789&quot;,                 &quot;listenerPath&quot;: &quot;/api/*&quot;,                 &quot;relativePath&quot;: &quot;/api/members/123456789&quot;,                 &quot;uriParams&quot;: {                     &quot;memberId&quot;: &quot;123456789&quot;                 },                 &quot;rawRequestUri&quot;: &quot;/api/members/123456789&quot;,                 &quot;rawRequestPath&quot;: &quot;/api/members/123456789&quot;,                 &quot;requestPath&quot;: &quot;/api/members/123456789&quot;             }]" mediaType="application/java" encoding="UTF-8"/>
+      </munit:set-event>
+      <!-- Execute the flow -->
+      <flow-ref doc:name="Execute Flow" name="get:\members\(memberId):loyalty-management-api-config"/>
+    </munit:execution>
+    <munit:validation>
+      <!-- Verify that the INFO logger "Request Received" is called -->
+      <munit-tools:verify-call doc:name="Verify INFO: Request Received" processor="logger">
+        <munit-tools:with-attributes>
+          <munit-tools:with-attribute whereValue="INFO: Request Received" attributeName="doc:name"/>
+        </munit-tools:with-attributes>
+      </munit-tools:verify-call>
+      <!-- Verify that the DEBUG logger "Outbound Request" is called -->
+      <munit-tools:verify-call doc:name="Verify DEBUG: Outbound Request" processor="logger">
+        <munit-tools:with-attributes>
+          <munit-tools:with-attribute whereValue="DEBUG: Outbound Request" attributeName="doc:name"/>
+        </munit-tools:with-attributes>
+      </munit-tools:verify-call>
+      <!-- Verify that the HTTP request "Retrieve Member Profile Details" is called -->
+      <munit-tools:verify-call doc:name="Verify HTTP Request" processor="http:request">
+        <munit-tools:with-attributes>
+          <munit-tools:with-attribute whereValue="Retrieve Member Profile Details" attributeName="doc:name"/>
+        </munit-tools:with-attributes>
+      </munit-tools:verify-call>
+      <!-- Verify that the ERROR logger "Non Retryable Error" is called -->
+      <munit-tools:verify-call doc:name="Verify ERROR: Non Retryable Error" processor="logger">
+        <munit-tools:with-attributes>
+          <munit-tools:with-attribute whereValue="ERROR: Non Retryable Error" attributeName="doc:name"/>
+        </munit-tools:with-attributes>
+      </munit-tools:verify-call>
+      <!-- Verify that the ERROR logger "Error Response Payload" is called -->
+      <munit-tools:verify-call doc:name="Verify ERROR: Error Response Payload" processor="logger">
+        <munit-tools:with-attributes>
+          <munit-tools:with-attribute whereValue="ERROR: Error Response Payload" attributeName="doc:name"/>
+        </munit-tools:with-attributes>
+      </munit-tools:verify-call>
+      <!-- Verify that the INFO logger "Request Completed" is called -->
+      <munit-tools:verify-call doc:name="Verify INFO: Request Completed" processor="logger">
+        <munit-tools:with-attributes>
+          <munit-tools:with-attribute whereValue="INFO: Request Completed" attributeName="doc:name"/>
+        </munit-tools:with-attributes>
+      </munit-tools:verify-call>
+      <!-- Assert that the payload is null (based on existing test pattern) -->
+      <munit-tools:assert-that doc:name="Assert Error Response Payload" expression="#[payload]" is="#[MunitTools::nullValue()]"/>
+    </munit:validation>
+  </munit:test>
+  <munit:test name="test_suite_munit_flow_test_2" doc:id="connectivity-error-retry-test" description="Test member profile retrieval with retryable error (HTTP:CONNECTIVITY) that triggers on-error-propagate and retry mechanism" expectedErrorType="HTTP:CONNECTIVITY">
+    <munit:behavior>
+      <!-- Mock the HTTP request to throw HTTP:CONNECTIVITY error for all retry attempts -->
+      <munit-tools:mock-when doc:name="Mock HTTP Request - Retrieve Member Profile Details" processor="http:request">
+        <munit-tools:with-attributes>
+          <munit-tools:with-attribute whereValue="Retrieve Member Profile Details" attributeName="doc:name"/>
+        </munit-tools:with-attributes>
+        <munit-tools:then-return>
+          <munit-tools:error typeId="HTTP:CONNECTIVITY"/>
+        </munit-tools:then-return>
+      </munit-tools:mock-when>
+    </munit:behavior>
+    <munit:execution>
+      <!-- Set event with attributes containing memberId in uriParams and authorization header -->
+      <munit:set-event doc:name="Set Event">
+        <munit:attributes value="#[MunitTools::getResourceAsString('test_suite_munit_flow_test_1749157/mock_data_scenario_2/test-request-attributes.json')]" mediaType="application/json" encoding="UTF-8"/>
+      </munit:set-event>
+      <!-- Execute the flow expecting HTTP:CONNECTIVITY error -->
+      <flow-ref doc:name="Execute Flow" name="get:\members\(memberId):loyalty-management-api-config"/>
+    </munit:execution>
+    <munit:validation>
+      <!-- Verify that the INFO logger "Request Received" is called -->
+      <munit-tools:verify-call doc:name="Verify INFO Request Received" processor="logger" times="1">
+        <munit-tools:with-attributes>
+          <munit-tools:with-attribute whereValue="INFO: Request Received" attributeName="doc:name"/>
+        </munit-tools:with-attributes>
+      </munit-tools:verify-call>
+      <!-- Verify that the DEBUG logger "Outbound Request" is called multiple times due to retry mechanism -->
+      <munit-tools:verify-call doc:name="Verify DEBUG Outbound Request" processor="logger" times="3">
+        <munit-tools:with-attributes>
+          <munit-tools:with-attribute whereValue="DEBUG: Outbound Request" attributeName="doc:name"/>
+        </munit-tools:with-attributes>
+      </munit-tools:verify-call>
+      <!-- Verify that the HTTP request "Retrieve Member Profile Details" is called multiple times -->
+      <munit-tools:verify-call doc:name="Verify HTTP Request Called Multiple Times" processor="http:request" times="3">
+        <munit-tools:with-attributes>
+          <munit-tools:with-attribute whereValue="Retrieve Member Profile Details" attributeName="doc:name"/>
+        </munit-tools:with-attributes>
+      </munit-tools:verify-call>
+      <!-- Verify that the ERROR logger "Connectivity or Timeout" is called -->
+      <munit-tools:verify-call doc:name="Verify ERROR Connectivity Logger" processor="logger" times="3">
+        <munit-tools:with-attributes>
+          <munit-tools:with-attribute whereValue="ERROR: Connectivity or Timeout" attributeName="doc:name"/>
+        </munit-tools:with-attributes>
+      </munit-tools:verify-call>
+    </munit:validation>
+  </munit:test>
+</mule>
