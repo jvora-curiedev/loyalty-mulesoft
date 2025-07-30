@@ -1,0 +1,151 @@
+<?xml version="1.0" ?>
+<mule xmlns:os="http://www.mulesoft.org/schema/mule/os" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:validation="http://www.mulesoft.org/schema/mule/validation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xsi:schemaLocation="     http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd     http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd     http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd     http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
+  <munit:config name="get_member_loyalty_mgmt_api_8683.xml"/>
+  <munit:test name="get_member_loyalty_mgmt_api_0" doc:id="a1b2c3d4-e5f6-7890-1234-567890abcdef" description="Test successful member profile retrieval through the get member by ID flow with proper authorization and member ID">
+    <!-- Behavior section: Sets up the initial state and mocks external systems. -->
+    <munit:behavior>
+      <!-- Mock the HTTP request to the Salesforce API to prevent an actual callout and return a predefined successful response. -->
+      <munit-tools:mock-when doc:name="Mock Retrieve Member Profile Details" doc:id="b2c3d4e5-f6a7-8901-2345-67890abcdef1" processor="http:request">
+        <munit-tools:with-attributes>
+          <munit-tools:with-attribute whereValue="Retrieve Member Profile Details" attributeName="doc:name"/>
+        </munit-tools:with-attributes>
+        <munit-tools:then-return>
+          <munit-tools:payload value="#[MunitTools::getResourceAsString('get_member_loyalty_mgmt_api_8683/get_member_by_id_response_1666.json')]" mediaType="application/json" encoding="UTF-8"/>
+        </munit-tools:then-return>
+      </munit-tools:mock-when>
+      <!-- Set the initial event with necessary attributes to trigger the flow, including headers and URI parameters. -->
+      <munit:set-event doc:name="Set Event for Member Retrieval" doc:id="c3d4e5f6-a7b8-9012-3456-7890abcdef12">
+        <munit:attributes value="#[{                 &quot;headers&quot;: {                     &quot;authorization&quot;: &quot;Bearer 00DDn00000C16Vj!AQkAQCtjycNRLBS4kJE51z2xyEBxVcPpKacsIZ68c2pMuSqoDKrD7rHYF.gtCwqpa31jASZ8qmJ_56hE1pf8W2yGvUGfBy5C&quot;                 },                 &quot;uriParams&quot;: {                     &quot;memberId&quot;: &quot;675424&quot;                 }             }]"/>
+      </munit:set-event>
+    </munit:behavior>
+    <!-- Execution section: Runs the flow to be tested. -->
+    <munit:execution>
+      <flow-ref doc:name="Execute get:\members\(memberId):loyalty-management-api-config" doc:id="d4e5f6a7-b8c9-0123-4567-890abcdef123" name="get:\members\(memberId):loyalty-management-api-config"/>
+    </munit:execution>
+    <!-- Validation section: Verifies the outcome of the flow execution. -->
+    <munit:validation>
+      <!-- Verify that the transform component for setting request attributes was called. -->
+      <munit-tools:verify-call doc:name="Verify Request Attributes Transform" doc:id="e5f6a7b8-c9d0-1234-5678-90abcdef1234" processor="ee:transform">
+        <munit-tools:with-attributes>
+          <munit-tools:with-attribute whereValue="Request Attributes" attributeName="doc:name"/>
+        </munit-tools:with-attributes>
+      </munit-tools:verify-call>
+      <!-- Verify that the initial INFO logger was called. -->
+      <munit-tools:verify-call doc:name="Verify INFO: Request Received" doc:id="f6a7b8c9-d0e1-2345-6789-0abcdef12345" processor="logger">
+        <munit-tools:with-attributes>
+          <munit-tools:with-attribute whereValue="INFO: Request Received" attributeName="doc:name"/>
+        </munit-tools:with-attributes>
+      </munit-tools:verify-call>
+      <!-- Verify that the HTTP request to retrieve member details was called exactly once. -->
+      <munit-tools:verify-call doc:name="Verify Retrieve Member Profile Details Call" doc:id="a7b8c9d0-e1f2-3456-7890-bcdef1234567" processor="http:request" times="1">
+        <munit-tools:with-attributes>
+          <munit-tools:with-attribute whereValue="Retrieve Member Profile Details" attributeName="doc:name"/>
+        </munit-tools:with-attributes>
+      </munit-tools:verify-call>
+      <!-- Verify that the final INFO logger was called. -->
+      <munit-tools:verify-call doc:name="Verify INFO: Request Completed" doc:id="b8c9d0e1-f2a3-4567-8901-cdef12345678" processor="logger">
+        <munit-tools:with-attributes>
+          <munit-tools:with-attribute whereValue="INFO: Request Completed" attributeName="doc:name"/>
+        </munit-tools:with-attributes>
+      </munit-tools:verify-call>
+      <!-- Assert that the final payload is not null, ensuring a response was generated. -->
+      <munit-tools:assert-that doc:name="Assert Payload is not Null" doc:id="c9d0e1f2-a3b4-5678-9012-def123456789" expression="#[payload]" is="#[MunitTools::notNullValue()]"/>
+    </munit:validation>
+  </munit:test>
+  <munit:test name="get_member_loyalty_mgmt_api_1" description="Test HTTP connectivity error scenario where the external API call fails and gets retried by until-successful scope" expectedErrorType="HTTP:CONNECTIVITY">
+    <munit:behavior>
+      <!-- Mock the HTTP request to throw HTTP:CONNECTIVITY error -->
+      <munit-tools:mock-when doc:name="Mock Retrieve Member Profile Details" processor="http:request">
+        <munit-tools:with-attributes>
+          <munit-tools:with-attribute whereValue="Retrieve Member Profile Details" attributeName="doc:name"/>
+        </munit-tools:with-attributes>
+        <munit-tools:then-return>
+          <munit-tools:error typeId="HTTP:CONNECTIVITY"/>
+        </munit-tools:then-return>
+      </munit-tools:mock-when>
+    </munit:behavior>
+    <munit:execution>
+      <!-- Set event with proper attributes including authorization header and memberId URI parameter -->
+      <munit:set-event doc:name="Set Event with Authorization and memberId">
+        <munit:attributes value="#[{                 'headers': {                     'authorization': 'Bearer 00DDn00000C16Vj!AQkAQCtjycNRLBS4kJE51z2xyEBxVcPpKacsIZ68c2pMuSqoDKrD7rHYF.gtCwqpa31jASZ8qmJ_56hE1pf8W2yGvUGfBy5C',                     'content-type': 'application/json',                     'accept': 'application/json'                 },                 'uriParams': {                     'memberId': '0lMDn000001qkTHMAY'                 },                 'queryParams': {},                 'requestPath': '/api/members/0lMDn000001qkTHMAY',                 'method': 'GET'             }]" mediaType="application/java" encoding="UTF-8"/>
+      </munit:set-event>
+      <!-- Execute the flow -->
+      <flow-ref doc:name="get:\members\(memberId):loyalty-management-api-config" name="get:\members\(memberId):loyalty-management-api-config"/>
+    </munit:execution>
+    <munit:validation>
+      <!-- Verify that the HTTP request connector is called -->
+      <munit-tools:verify-call doc:name="Verify HTTP Request Called" processor="http:request" times="3">
+        <munit-tools:with-attributes>
+          <munit-tools:with-attribute whereValue="Retrieve Member Profile Details" attributeName="doc:name"/>
+        </munit-tools:with-attributes>
+      </munit-tools:verify-call>
+      <!-- Verify that the DEBUG logger "Outbound Request" is called -->
+      <munit-tools:verify-call doc:name="Verify DEBUG Outbound Request Logger" processor="logger" times="3">
+        <munit-tools:with-attributes>
+          <munit-tools:with-attribute whereValue="DEBUG: Outbound Request" attributeName="doc:name"/>
+        </munit-tools:with-attributes>
+      </munit-tools:verify-call>
+      <!-- Verify that the ERROR logger "Connectivity or Timeout" is called -->
+      <munit-tools:verify-call doc:name="Verify ERROR Connectivity Logger" processor="logger" times="3">
+        <munit-tools:with-attributes>
+          <munit-tools:with-attribute whereValue="ERROR: Connectivity or Timeout" attributeName="doc:name"/>
+        </munit-tools:with-attributes>
+      </munit-tools:verify-call>
+      <!-- Verify that the until-successful scope attempts retry mechanism -->
+      <munit-tools:verify-call doc:name="Verify Until Successful Retry" processor="until-successful" times="1">
+        <munit-tools:with-attributes>
+          <munit-tools:with-attribute whereValue="Retry" attributeName="doc:name"/>
+        </munit-tools:with-attributes>
+      </munit-tools:verify-call>
+    </munit:validation>
+  </munit:test>
+  <munit:test name="get_member_loyalty_mgmt_api_2" doc:id="b1a2c3d4-e5f6-7890-1234-567890123456" description="Test HTTP non-retryable error scenario where API returns client error and gets handled by on-error-continue">
+    <munit:behavior>
+      <!-- Mock the HTTP request to return HTTP:BAD_REQUEST error -->
+      <munit-tools:mock-when doc:name="Mock HTTP Request Error" doc:id="mock-http-error-123" processor="http:request">
+        <munit-tools:with-attributes>
+          <munit-tools:with-attribute whereValue="Retrieve Member Profile Details" attributeName="doc:name"/>
+        </munit-tools:with-attributes>
+        <munit-tools:then-return>
+          <munit-tools:payload value="#[MunitTools::getResourceAsString('get_member_loyalty_mgmt_api_8683/error-response_1854.json')]" mediaType="application/json" encoding="UTF-8"/>
+          <munit-tools:attributes value="#[{statusCode: 400, reasonPhrase: 'Bad Request'}]" mediaType="application/java" encoding="UTF-8"/>
+          <munit-tools:error typeId="HTTP:BAD_REQUEST"/>
+        </munit-tools:then-return>
+      </munit-tools:mock-when>
+    </munit:behavior>
+    <munit:execution>
+      <!-- Set event with proper attributes including authorization header with Bearer token and memberId URI parameter -->
+      <munit:set-event doc:name="Set Event">
+        <munit:attributes value="#[{                 headers: {                     'authorization': 'Bearer 00DDn00000C16Vj!AQkAQNgYiQkLn.2W6lpSvt3tiAgNVSh2FTUcVsitW7gJarlJ2SBWwauS3CLOS7gsMr6HpkEr0dxqE5JU6.XpUTDHzNVGiVUJ',                     'content-type': 'application/json'                 },                 method: 'GET',                 uriParams: {                     'memberId': '12345'                 },                 requestPath: '/api/members/12345'             }]" mediaType="application/java" encoding="UTF-8"/>
+      </munit:set-event>
+      <!-- Execute the flow -->
+      <flow-ref doc:name="Execute get members by memberId flow" doc:id="execute-flow-123" name="get:\members\(memberId):loyalty-management-api-config"/>
+    </munit:execution>
+    <munit:validation>
+      <!-- Verify that the HTTP request connector is called -->
+      <munit-tools:verify-call doc:name="Verify HTTP Request Called" doc:id="verify-http-call-123" processor="http:request" times="1">
+        <munit-tools:with-attributes>
+          <munit-tools:with-attribute whereValue="Retrieve Member Profile Details" attributeName="doc:name"/>
+        </munit-tools:with-attributes>
+      </munit-tools:verify-call>
+      <!-- Verify that the ERROR logger "Non Retryable Error" is called -->
+      <munit-tools:verify-call doc:name="Verify Non Retryable Error Logger" doc:id="verify-error-logger-123" processor="logger" times="1">
+        <munit-tools:with-attributes>
+          <munit-tools:with-attribute whereValue="ERROR: Non Retryable Error" attributeName="doc:name"/>
+        </munit-tools:with-attributes>
+      </munit-tools:verify-call>
+      <!-- Verify that the ee:transform component "Error Message" processes the error response -->
+      <munit-tools:verify-call doc:name="Verify Error Message Transform" doc:id="verify-transform-123" processor="ee:transform" times="1">
+        <munit-tools:with-attributes>
+          <munit-tools:with-attribute whereValue="Error Message" attributeName="doc:name"/>
+        </munit-tools:with-attributes>
+      </munit-tools:verify-call>
+      <!-- Verify that the ERROR logger "Error Response Payload" is called -->
+      <munit-tools:verify-call doc:name="Verify Error Response Payload Logger" doc:id="verify-payload-logger-123" processor="logger" times="1">
+        <munit-tools:with-attributes>
+          <munit-tools:with-attribute whereValue="ERROR: Error Response Payload" attributeName="doc:name"/>
+        </munit-tools:with-attributes>
+      </munit-tools:verify-call>
+    </munit:validation>
+  </munit:test>
+</mule>
